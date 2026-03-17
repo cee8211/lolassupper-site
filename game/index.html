@@ -71,6 +71,10 @@ html,body{height:100%;width:100%;overflow:hidden;
   background:transparent;color:var(--gold);
   border:1.5px solid rgba(247,204,56,.6);box-shadow:none
 }
+.btn-gold{
+  background:linear-gradient(135deg,var(--gold),#fce97a);
+  color:#252535;box-shadow:0 6px 18px rgba(247,204,56,.38);font-weight:900
+}
 .btn:disabled{
   background:rgba(150,150,150,.25)!important;
   color:rgba(150,150,150,.7)!important;
@@ -745,16 +749,19 @@ html,body{height:100%;width:100%;overflow:hidden;
     <button class="back-btn" onclick="navigate('scoreboard')" style="color:rgba(255,255,255,.5);margin-bottom:8px">‹ Scoreboard</button>
     <div class="trophy-ring"><span class="trophy-emoji">🏆</span></div>
     <div class="go-title">Game Over!</div>
-    <div class="go-winner" id="go-winner">– wins!</div>
-    <div class="standings-lbl">FINAL STANDINGS</div>
+    <div class="go-winner" id="go-winner" style="display:none"></div>
+    <div id="calc-btn-wrap" style="margin-top:28px">
+      <button class="btn btn-gold w-full" onclick="revealFinalScores()">🎲 Calculate Final Score</button>
+    </div>
+    <div class="standings-lbl" id="standings-lbl" style="display:none">FINAL STANDINGS</div>
     <div id="standings"></div>
-    <div class="sg">
+    <div class="sg" id="go-sg" style="display:none">
       <div class="sg-title">SCORING GUIDE</div>
-      <div class="sg-row">✅ Correct guess 0: +10 pts</div>
-      <div class="sg-row">✅ Correct guess N: +(10 + 2×N) pts</div>
+      <div class="sg-row">✅ Correct guess 0: +11 pts</div>
+      <div class="sg-row">✅ Correct guess N: +(11 + 2×N) pts</div>
       <div class="sg-row">❌ Wrong: 10 − (3 × |guess−tricks|) pts</div>
     </div>
-    <div class="go-btns">
+    <div class="go-btns" id="go-btns" style="display:none">
       <button class="btn btn-gold-outline" onclick="navigate('scoreboard')">📊 Full Scoreboard</button>
       <button class="btn btn-coral" onclick="resetGame()">🔄 Play Again</button>
     </div>
@@ -798,7 +805,7 @@ const bettingOrder = () => {
 
 const calcScore = (g, t) => {
   if (g == null || t == null) return null;
-  return g === t ? 10 + 2*g : 10 - 3*Math.abs(g - t);
+  return g === t ? 11 + 2*g : 10 - 3*Math.abs(g - t);
 };
 
 const totalScore = pi =>
@@ -1301,22 +1308,57 @@ function closeSB() {
 
 /* ── GAME OVER ─────────────────────────────────────────────────── */
 function renderGameOver() {
-  const r = ranked();
-  document.getElementById('go-winner').textContent = `🏆 ${r[0].name} wins!`;
+  // Reset reveal state
+  document.getElementById('go-winner').style.display = 'none';
+  document.getElementById('calc-btn-wrap').style.display = '';
+  document.getElementById('standings-lbl').style.display = 'none';
+  document.getElementById('go-sg').style.display = 'none';
+  document.getElementById('go-btns').style.display = 'none';
+
+  const r = ranked(); // index 0 = highest score
   const medals = ['🥇','🥈','🥉'];
   const list = document.getElementById('standings');
   list.innerHTML = '';
-  r.forEach((p, pos) => {
+
+  // Render rows in reverse order (last place first in DOM) so reveal reads last→first
+  [...r].reverse().forEach((p, revPos) => {
+    const pos = r.length - 1 - revPos; // original rank position
     const isWin = pos === 0;
     const medal = medals[pos] || `${pos+1}.`;
     const div = document.createElement('div');
-    div.className = `standing-row${isWin ? ' win' : ''} anim-fade-up`;
-    div.style.animationDelay = (pos * 0.1 + 0.3) + 's';
+    div.className = `standing-row${isWin ? ' win' : ''}`;
+    div.style.display = 'none';
     div.innerHTML = `
       <div class="standing-medal${pos>=3?' num':''}">${medal}</div>
       <div class="standing-name ${isWin?'win':'oth'}">${p.name}</div>
       <div class="standing-pts ${p.score>=0?'pos':'neg'}">${p.score} pts</div>`;
     list.appendChild(div);
+  });
+}
+
+function revealFinalScores() {
+  document.getElementById('calc-btn-wrap').style.display = 'none';
+  document.getElementById('standings-lbl').style.display = '';
+
+  const rows = Array.from(document.querySelectorAll('#standings .standing-row'));
+  rows.forEach((row, i) => {
+    setTimeout(() => {
+      row.style.display = '';
+      row.classList.add('anim-fade-up');
+
+      if (i === rows.length - 1) {
+        // All revealed — show winner and action buttons
+        setTimeout(() => {
+          const r = ranked();
+          const winnerEl = document.getElementById('go-winner');
+          winnerEl.textContent = `🏆 ${r[0].name} wins!`;
+          winnerEl.style.display = '';
+          winnerEl.classList.add('anim-fade-up');
+          document.getElementById('go-sg').style.display = '';
+          document.getElementById('go-btns').style.display = '';
+        }, 700);
+      }
+    }, i * 700);
   });
 }
 
