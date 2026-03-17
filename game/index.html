@@ -1113,15 +1113,6 @@ function renderResults() {
     list.appendChild(div);
   }
 
-  // Wire up trick buttons via event delegation
-  list.addEventListener('click', e => {
-    const btn = e.target.closest('.trick-btn');
-    if (!btn || btn.classList.contains('off')) return;
-    const pi = parseInt(btn.dataset.p);
-    const delta = parseInt(btn.dataset.d);
-    changeTricks(pi, delta);
-  });
-
   updateResultsUI();
 }
 
@@ -1358,6 +1349,15 @@ function backFromResults() {
   S.currentBets = S.roundData[ri].map(p => p.guess ?? 0);
   navigate('betting');
 }
+
+// Wire up trick buttons once via event delegation
+document.getElementById('results-list').addEventListener('click', e => {
+  const btn = e.target.closest('.trick-btn');
+  if (!btn || btn.classList.contains('off')) return;
+  const pi = parseInt(btn.dataset.p);
+  const delta = parseInt(btn.dataset.d);
+  changeTricks(pi, delta);
+});
 </script>
 </body>
 </html>
