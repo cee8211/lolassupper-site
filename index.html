@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LoLa's Supper Club</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <header class="site-header" id="site-header">
+    <nav class="nav">
+      <a href="#hero" class="nav-logo-link">
+        <img src="LoLas Logo.png" alt="LoLa's Supper Club" class="nav-logo-img">
+      </a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#about"      class="nav-link" data-section="about">About</a></li>
+        <li><a href="#upcoming"   class="nav-link" data-section="upcoming">Upcoming</a></li>
+        <li><a href="#past"       class="nav-link" data-section="past">Past Events</a></li>
+        <li><a href="#afterhours" class="nav-link" data-section="afterhours">After Hours</a></li>
+      </ul>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero" id="hero">
+    <div class="hero-noise"></div>
+    <div class="hero-content">
+      <p class="hero-eyebrow">est. 2025 &nbsp;—&nbsp; Cape Town</p>
+      <h1 class="hero-title">LoLa's<br>Supper<br>Club</h1>
+      <p class="hero-sub">Intimate dinners. Loud tables. Good wine.</p>
+      <a href="#about" class="hero-cta">Come In</a>
+    </div>
+    <div class="hero-scroll">
+      <span>scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section class="section" id="about">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-label">01 &mdash; About</span>
+        <h2 class="section-title">The Club</h2>
+      </div>
+      <div class="about-grid">
+        <div class="about-text">
+          <p class="about-lead">LoLa's Supper Club is an intimate, invitation-only dining experience built around great food, natural wine, and even better company.</p>
+          <p>Each event is themed &mdash; a new cuisine, a wine pairing, a season's best ingredients. We cook, we eat, we linger. The table doesn't clear until everyone's ready to go home.</p>
+          <p>Born out of a love for the kind of dinner parties people still talk about the next morning.</p>
+        </div>
+        <div class="about-details">
+          <div class="detail-row">
+            <span class="detail-label">Format</span>
+            <span class="detail-value">Intimate group dining</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Frequency</span>
+            <span class="detail-value">Monthly</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Style</span>
+            <span class="detail-value">Themed, family-style</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Wine</span>
+            <span class="detail-value">Natural, always</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Dress code</span>
+            <span class="detail-value">Come as you are</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Upcoming Events -->
+  <section class="section section--dark" id="upcoming">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-label">02 &mdash; Upcoming</span>
+        <h2 class="section-title">What's<br>Next</h2>
+      </div>
+      <div class="upcoming-grid">
+        <div class="upcoming-card upcoming-card--tease">
+          <div class="upcoming-card-tag">Next Dinner</div>
+          <div class="upcoming-card-body">
+            <h3 class="upcoming-card-title">Details Coming Soon</h3>
+            <p class="upcoming-card-desc">Something is simmering. Stay close for the next LoLa's experience &mdash; theme, date, and menu reveal incoming.</p>
+          </div>
+          <div class="upcoming-card-footer">
+            <a href="mailto:hello@lolassupperclub.com?subject=Put me on the list" class="btn btn--outline">Get on the List</a>
+          </div>
+        </div>
+        <div class="upcoming-sidebar">
+          <div class="sidebar-block">
+            <span class="sidebar-label">How it works</span>
+            <ol class="sidebar-list">
+              <li>Get on the list</li>
+              <li>Receive the invite</li>
+              <li>Bring a bottle</li>
+              <li>Don't be the first to leave</li>
+            </ol>
+          </div>
+          <div class="sidebar-block">
+            <span class="sidebar-label">Past themes</span>
+            <ul class="sidebar-tags">
+              <li>Middle Eastern Mezze</li>
+              <li>Ode to All Things Orange</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Past Events -->
+  <section class="section" id="past">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-label">03 &mdash; Past Events</span>
+        <h2 class="section-title">The<br>Archive</h2>
+        <p class="section-sub">Every dinner, documented. Click any event for the full menu and recipes.</p>
+      </div>
+      <div class="archive-grid">
+
+        <!-- Skin Contact -->
+        <article class="archive-card" onclick="openEvent('skin-contact')">
+          <div class="archive-card-visual">
+            <img src="menu-skin-contact.png" alt="Skin Contact menu" class="archive-menu-img">
+          </div>
+          <div class="archive-card-body">
+            <div class="archive-meta">
+              <span class="archive-theme">Skin Contact</span>
+            </div>
+            <h3 class="archive-title">Ode to All Things Orange</h3>
+            <p class="archive-excerpt">Tuna crudo with gooseberry salsa. Pumpkin rigatoni. Honey orange pork tenderloin. A meal that tasted like the last warm day of the year.</p>
+            <div class="archive-courses">
+              <span>Starters</span>
+              <span>Primi</span>
+              <span>Secondi</span>
+              <span>Sweet Treat</span>
+            </div>
+            <button class="btn btn--text" tabindex="-1">View Menu &amp; Recipes &rarr;</button>
+          </div>
+        </article>
+
+        <!-- Happies -->
+        <article class="archive-card" onclick="openEvent('happies')">
+          <div class="archive-card-visual">
+            <img src="menu-happies.png" alt="Happies menu" class="archive-menu-img">
+          </div>
+          <div class="archive-card-body">
+            <div class="archive-meta">
+              <span class="archive-date">12.07.25</span>
+              <span class="archive-theme">Happies</span>
+            </div>
+            <h3 class="archive-title">Middle Eastern Mezze Night</h3>
+            <p class="archive-excerpt">Spanakopita. LoLa's borek. Za'atar chicken. A spread that took three hours to eat and that's exactly the point.</p>
+            <div class="archive-courses">
+              <span>Happies</span>
+              <span>Dips &amp; Things</span>
+              <span>Main Event</span>
+              <span>Sweet Treat</span>
+            </div>
+            <button class="btn btn--text" tabindex="-1">View Menu &amp; Recipes &rarr;</button>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- After Hours -->
+  <section class="section section--dark" id="afterhours">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-label">04 &mdash; After Hours</span>
+        <h2 class="section-title">Up &amp;<br>Down<br>the River</h2>
+        <p class="section-sub">The card game that ends every LoLa's night the right way.</p>
+      </div>
+      <div class="afterhours-launch">
+        <div class="afterhours-card">
+          <img src="game/corgi_icon.png" alt="Up and Down the River" class="afterhours-corgi">
+          <div class="afterhours-card-text">
+            <h3 class="afterhours-card-title">Ready to play?</h3>
+            <p class="afterhours-card-desc">The full game lives at its own address. Grab your phones, open it up, and deal in.</p>
+          </div>
+          <a href="game/" target="_blank" class="btn btn--primary afterhours-btn">Launch Game &rarr;</a>
+        </div>
+        <div class="afterhours-rules">
+          <div class="rule-block">
+            <span class="rule-num">01</span>
+            <p>Everyone is dealt cards — 1 on the first round, going up to a max, then back down to 1.</p>
+          </div>
+          <div class="rule-block">
+            <span class="rule-num">02</span>
+            <p>Before playing, everyone bids how many tricks they think they'll win that round.</p>
+          </div>
+          <div class="rule-block">
+            <span class="rule-num">03</span>
+            <p>Hit your exact bid: <strong>+10 + bid</strong>. Miss by any amount: <strong>&minus;5 per trick off</strong>.</p>
+          </div>
+          <div class="rule-block">
+            <span class="rule-num">04</span>
+            <p>The dealer can't bid the number that makes total bids equal the card count. Someone always suffers.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <img src="LoLas Logo.png" alt="LoLa's Supper Club" class="footer-logo">
+      <p class="footer-tagline">Good food. Good wine. Good people.</p>
+      <a href="mailto:hello@lolassupperclub.com" class="footer-email">hello@lolassupperclub.com</a>
+    </div>
+  </footer>
+
+  <!-- Event / Menu Modal -->
+  <div id="event-modal" class="modal" aria-hidden="true" role="dialog">
+    <div class="modal-backdrop" onclick="closeModal()"></div>
+    <div class="modal-panel" id="modal-panel">
+      <button class="modal-close" onclick="closeModal()" aria-label="Close">&times;</button>
+      <div class="modal-content" id="modal-content"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

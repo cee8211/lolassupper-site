@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f2705a">
+<link rel="icon" type="image/png" href="corgi_icon.png">
+<link rel="apple-touch-icon" href="corgi_icon.png">
+<title>Up &amp; Down the River</title>
+<style>
+/* ── RESET ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;width:100%;overflow:hidden;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+  -webkit-tap-highlight-color:transparent;background:#f7edde}
+
+/* ── TOKENS ── */
+:root{
+  --coral:#f2705a; --coral2:#d44832;
+  --teal:#2dadb8;  --teal2:#1a8a94;
+  --gold:#f7cc38;  --bg:#f7edde;
+  --dark:#252535;  --mid:#70708a;
+  --white:#ffffff;
+}
+
+/* ── SCREENS ── */
+.screen{
+  position:fixed;inset:0;display:none;
+  flex-direction:column;overflow:hidden;
+  transition:opacity .25s ease;
+}
+.screen.active{display:flex}
+
+/* ── SCROLL AREA ── */
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;
+  padding-bottom:max(16px,calc(env(safe-area-inset-bottom) + 16px))}
+.scroll::-webkit-scrollbar{display:none}
+
+/* ── TOP BAR ── */
+.top-bar{
+  background:rgba(255,255,255,.9);backdrop-filter:blur(8px);
+  padding:12px 16px;border-bottom:1px solid rgba(0,0,0,.06);
+  flex-shrink:0
+}
+
+/* ── BUTTONS ── */
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:17px 20px;border:none;border-radius:18px;
+  cursor:pointer;font-size:1.05rem;font-weight:700;
+  transition:transform .12s,opacity .2s;-webkit-appearance:none;
+  font-family:inherit
+}
+.btn:active:not(:disabled){transform:scale(.96)}
+.btn-coral{
+  background:linear-gradient(135deg,var(--coral),var(--coral2));
+  color:#fff;box-shadow:0 6px 18px rgba(242,112,90,.38)
+}
+.btn-teal{
+  background:linear-gradient(135deg,var(--teal),var(--teal2));
+  color:#fff;box-shadow:0 6px 18px rgba(45,173,184,.38)
+}
+.btn-ghost{
+  background:transparent;color:var(--teal);
+  font-size:.9rem;padding:12px;box-shadow:none
+}
+.btn-gold-outline{
+  background:transparent;color:var(--gold);
+  border:1.5px solid rgba(247,204,56,.6);box-shadow:none
+}
+.btn:disabled{
+  background:rgba(150,150,150,.25)!important;
+  color:rgba(150,150,150,.7)!important;
+  box-shadow:none!important;cursor:not-allowed
+}
+
+/* ── CARD ── */
+.card{background:#fff;border-radius:20px;padding:18px;
+  box-shadow:0 4px 16px rgba(0,0,0,.07)}
+
+/* ── INPUT ── */
+.name-field{
+  display:flex;align-items:center;gap:12px;
+  background:#fff;border-radius:16px;padding:14px 16px;
+  box-shadow:0 3px 10px rgba(0,0,0,.06);
+  transition:box-shadow .2s;
+}
+.name-field:focus-within{box-shadow:0 0 0 2px rgba(45,173,184,.4),0 3px 10px rgba(0,0,0,.06)}
+.name-field input{
+  flex:1;border:none;outline:none;font-size:1rem;font-weight:500;
+  background:transparent;color:var(--dark);font-family:inherit
+}
+.name-field input::placeholder{color:var(--mid);font-weight:400}
+
+/* ── BADGE ── */
+.badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:34px;height:34px;border-radius:50%;
+  font-size:.85rem;font-weight:700;flex-shrink:0
+}
+.badge-teal{background:rgba(45,173,184,.15);color:var(--teal)}
+.badge-coral{background:var(--coral);color:#fff}
+
+/* ── PROGRESS BAR ── */
+.prog-track{height:8px;background:rgba(0,0,0,.08);border-radius:4px;position:relative}
+.prog-fill{height:100%;border-radius:4px;
+  background:linear-gradient(90deg,var(--teal),var(--coral));
+  transition:width .4s ease}
+.prog-peak{
+  position:absolute;top:-3px;left:50%;
+  width:3px;height:14px;background:var(--gold);
+  border-radius:2px;transform:translateX(-50%)
+}
+
+/* ── BACK BUTTON ── */
+.back-btn{
+  background:none;border:none;cursor:pointer;
+  font-size:1.6rem;line-height:1;color:var(--mid);
+  padding:4px 10px 4px 0;font-family:inherit;flex-shrink:0
+}
+.back-btn:active{opacity:.45}
+
+/* ── ROUND BADGE ── */
+.round-badge{
+  background:rgba(45,173,184,.12);color:var(--teal);
+  border-radius:50px;padding:5px 13px;
+  font-size:.8rem;font-weight:800;flex-shrink:0;white-space:nowrap
+}
+
+/* ── ANIMATIONS ── */
+@keyframes waveScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@keyframes cloudDrift1{0%,100%{transform:translateX(-12px)}50%{transform:translateX(12px)}}
+@keyframes cloudDrift2{0%,100%{transform:translateX(12px)}50%{transform:translateX(-12px)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{from{opacity:0;transform:scale(.65)}to{opacity:1;transform:scale(1)}}
+@keyframes titleIn{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+
+.anim-fade-up{animation:fadeUp .4s ease both}
+.anim-pop{animation:popIn .4s cubic-bezier(.34,1.56,.64,1) both}
+.d1{animation-delay:.05s}.d2{animation-delay:.12s}.d3{animation-delay:.19s}
+.d4{animation-delay:.26s}.d5{animation-delay:.33s}.d6{animation-delay:.40s}
+
+/* ════════════════════════════════
+   WELCOME
+════════════════════════════════ */
+#screen-welcome{
+  background:linear-gradient(180deg,#99ddf9 0%,#c5edf9 30%,#dff3ff 60%,#aad8f5 100%)
+}
+.welcome-sky{flex:1;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center}
+
+/* Clouds */
+.cloud{position:absolute;opacity:.85}
+.cloud-body{position:relative;background:#fff;border-radius:50px}
+.cloud-body::before,.cloud-body::after{content:'';position:absolute;background:#fff;border-radius:50%}
+.c1{top:55px;left:18px;animation:cloudDrift1 9s ease-in-out infinite}
+.c1 .cloud-body{width:108px;height:40px}
+.c1 .cloud-body::before{width:54px;height:54px;top:-24px;left:14px}
+.c1 .cloud-body::after{width:40px;height:40px;top:-18px;left:58px}
+.c2{top:28px;right:24px;animation:cloudDrift2 11s ease-in-out infinite;opacity:.65}
+.c2 .cloud-body{width:82px;height:32px}
+.c2 .cloud-body::before{width:42px;height:42px;top:-19px;left:11px}
+.c2 .cloud-body::after{width:30px;height:30px;top:-13px;left:46px}
+.c3{top:95px;right:8px;animation:cloudDrift1 13s ease-in-out infinite;opacity:.45}
+.c3 .cloud-body{width:60px;height:22px}
+.c3 .cloud-body::before{width:30px;height:30px;top:-14px;left:9px}
+.c3 .cloud-body::after{width:22px;height:22px;top:-10px;left:33px}
+
+.welcome-title-area{
+  margin-top:28px;text-align:center;z-index:2;
+  animation:titleIn .7s .5s cubic-bezier(.34,1.56,.64,1) both
+}
+.welcome-title{
+  font-size:3rem;font-weight:900;line-height:1;
+  background:linear-gradient(135deg,var(--coral),var(--coral2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 3px 6px rgba(242,112,90,.3))
+}
+.welcome-subtitle{
+  font-size:1rem;font-weight:600;color:#4a8faa;margin-top:5px;
+  animation:fadeUp .5s 1s ease both
+}
+
+/* Corgi icon on welcome */
+.welcome-corgi{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  z-index:2;animation:fadeUp .8s .2s ease both
+}
+.welcome-corgi img{
+  width:140px;height:140px;border-radius:30px;
+  box-shadow:0 10px 36px rgba(0,0,0,.18)
+}
+
+/* Water */
+.water-wrap{flex-shrink:0;height:88px;overflow:hidden;position:relative}
+.water-svg{
+  position:absolute;bottom:0;left:0;width:200%;height:100%;
+  animation:waveScroll 4s linear infinite
+}
+
+.welcome-btn{padding:0 24px max(30px,calc(env(safe-area-inset-bottom) + 16px));flex-shrink:0;animation:popIn .5s 1.4s cubic-bezier(.34,1.56,.64,1) both}
+
+/* ════════════════════════════════
+   PLAYER COUNT
+════════════════════════════════ */
+#screen-player-count{background:var(--bg)}
+.count-bubble{
+  background:#fff;border-radius:24px;
+  box-shadow:0 8px 24px rgba(45,173,184,.18);
+  padding:24px;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:14px
+}
+.count-num{font-size:5rem;font-weight:900;color:var(--teal);line-height:1;transition:transform .15s}
+.count-lbl{font-size:1.1rem;font-weight:600;color:rgba(45,173,184,.7);margin-top:-6px}
+.stepper-row{display:flex;gap:28px}
+.stepper-btn{
+  background:none;border:none;cursor:pointer;
+  font-size:3rem;line-height:1;padding:4px;
+  border-radius:50%;transition:transform .12s,opacity .2s;
+  font-family:inherit
+}
+.stepper-btn:active{transform:scale(.85)}
+.stepper-btn.off{opacity:.2;pointer-events:none}
+.stepper-minus{color:var(--coral)}
+.stepper-plus{color:var(--teal)}
+.info-card{border-radius:20px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.07)}
+.info-row{
+  display:flex;align-items:center;gap:12px;
+  padding:13px 18px;background:#fff;
+  border-bottom:1px solid rgba(0,0,0,.05)
+}
+.info-row:last-child{border-bottom:none}
+.info-icon{font-size:1.1rem;flex-shrink:0;width:22px;text-align:center}
+.info-lbl{flex:1;font-size:.9rem;color:var(--mid);font-weight:500}
+.info-val{font-size:1rem;font-weight:700;color:var(--dark)}
+
+/* ════════════════════════════════
+   PLAYER NAMES
+════════════════════════════════ */
+#screen-player-names{background:var(--bg)}
+.names-hdr{padding:20px 16px 0}
+.names-title{font-size:1.65rem;font-weight:900;color:var(--dark)}
+.dealer-note{
+  display:flex;align-items:center;gap:8px;
+  background:#fff;border-radius:14px;padding:9px 14px;
+  margin-top:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);
+  font-size:.85rem;font-weight:600;color:var(--dark)
+}
+.check-icon{color:var(--teal);font-size:1.1rem;flex-shrink:0}
+
+/* ════════════════════════════════
+   BETTING
+════════════════════════════════ */
+#screen-betting{background:var(--bg)}
+.bet-round-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.bet-round-cards{font-size:1.25rem;font-weight:900;color:var(--dark)}
+.bet-round-num{font-size:.78rem;color:var(--mid);font-weight:600}
+.bet-dealer-block{text-align:right}
+.bet-dealer-tag{font-size:.72rem;color:var(--mid)}
+.bet-dealer-name{font-size:.88rem;font-weight:700;color:var(--dark)}
+
+.player-card-inner{text-align:center}
+.dealer-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(242,112,90,.12);color:var(--coral);
+  border-radius:50px;padding:4px 12px;
+  font-size:.78rem;font-weight:700;margin-bottom:8px
+}
+.player-name-big{font-size:1.7rem;font-weight:900;color:var(--dark)}
+.player-sub{font-size:.88rem;color:var(--mid);margin-top:3px}
+.bet-circle{
+  width:110px;height:110px;border-radius:50%;margin:16px auto;
+  background:radial-gradient(circle,rgba(45,173,184,.13),rgba(45,173,184,.04));
+  display:flex;align-items:center;justify-content:center
+}
+.bet-num{font-size:3.8rem;font-weight:900;color:var(--teal);transition:transform .12s}
+.bet-grid{display:grid;gap:8px;margin-top:12px}
+.bet-btn{
+  width:50px;height:50px;border-radius:50%;border:none;cursor:pointer;
+  font-size:1.1rem;font-weight:700;
+  background:rgba(0,0,0,.07);color:var(--dark);
+  transition:background .12s,color .12s,transform .1s;
+  margin:auto;font-family:inherit
+}
+.bet-btn:active:not(.restricted){transform:scale(.88)}
+.bet-btn.selected{background:var(--teal);color:#fff}
+.bet-btn.restricted{
+  background:rgba(242,112,90,.1);color:rgba(242,112,90,.5);
+  border:1.5px solid rgba(242,112,90,.4);cursor:not-allowed
+}
+.prev-bets-hdr{font-size:.85rem;font-weight:700;color:var(--mid);margin-bottom:10px}
+.prev-bet-row{display:flex;align-items:center;gap:10px;padding:5px 0}
+.prev-bet-name{flex:1;font-size:.93rem;color:var(--dark);font-weight:500}
+.prev-bet-val{font-size:.93rem;font-weight:700;color:var(--coral)}
+.bets-total-row{
+  display:flex;justify-content:space-between;
+  padding:8px 0 0;border-top:1px solid rgba(0,0,0,.07);margin-top:6px;
+  font-size:.88rem
+}
+.bets-total-lbl{color:var(--mid);font-weight:600}
+.ban{
+  background:#fff2ed;border:1px solid rgba(242,112,90,.3);
+  border-radius:14px;padding:12px 14px;
+  display:flex;gap:10px;align-items:flex-start
+}
+.ban.shake{animation:shake .4s ease}
+.ban-icon{font-size:1.1rem;flex-shrink:0}
+.ban-title{font-size:.83rem;font-weight:700;color:#5a2a18}
+.ban-text{font-size:.78rem;color:#7a4a38;margin-top:2px}
+
+/* ── ALL-AT-ONCE BET ROWS ── */
+.bet-all-row{
+  display:flex;align-items:center;gap:12px;
+  background:#fff;border-radius:16px;padding:12px 14px;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);margin-bottom:10px;
+  transition:box-shadow .2s;
+}
+.bet-all-row.dealer-blocked{
+  box-shadow:0 0 0 2px rgba(242,112,90,.45),0 2px 8px rgba(0,0,0,.05);
+}
+.bet-row-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.bet-row-indicator{width:34px;height:34px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.bet-row-name{font-size:.98rem;font-weight:700;color:var(--dark);line-height:1.2}
+.bet-row-role{font-size:.7rem;font-weight:700;margin-top:2px}
+.bet-row-role.first{color:var(--teal)}
+.bet-row-role.deal{color:var(--coral)}
+
+/* ════════════════════════════════
+   RESULTS
+════════════════════════════════ */
+#screen-results{background:var(--bg)}
+.res-row{
+  display:flex;align-items:center;gap:12px;
+  background:#fff;border-radius:16px;padding:12px 14px;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);margin-bottom:10px
+}
+.res-info{flex:1;min-width:0}
+.res-name{font-size:.98rem;font-weight:700;color:var(--dark)}
+.res-bet{font-size:.78rem;color:var(--mid);margin-top:1px}
+.tricks-step{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.trick-btn{
+  background:none;border:none;cursor:pointer;
+  font-size:1.8rem;line-height:1;padding:2px;
+  transition:opacity .2s,transform .1s;font-family:inherit
+}
+.trick-btn:active:not(.off){transform:scale(.85)}
+.trick-btn.off{opacity:.2;pointer-events:none}
+.trick-btn-m{color:var(--coral)}
+.trick-btn-p{color:var(--teal)}
+.trick-cnt{font-size:1.5rem;font-weight:900;color:var(--dark);width:32px;text-align:center}
+.val-card{
+  display:flex;gap:10px;align-items:center;
+  background:#fff;border-radius:14px;padding:12px 14px;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);margin-bottom:12px
+}
+.val-icon{font-size:1.2rem}
+.val-text{font-size:.83rem;font-weight:500;color:var(--mid)}
+.scp-title{font-size:.83rem;font-weight:700;color:var(--mid);margin-bottom:10px}
+.scp-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0}
+.scp-name{font-size:.93rem;color:var(--dark)}
+.scp-pts{font-size:.93rem;font-weight:700}
+.pts-pos{color:var(--teal)}.pts-neg{color:var(--coral)}
+
+/* ════════════════════════════════
+   SCOREBOARD
+════════════════════════════════ */
+#screen-scoreboard{background:#1a1e33}
+.sb-hdr{
+  background:linear-gradient(180deg,#1e2340,#161a30);
+  padding:14px 18px;display:flex;align-items:center;
+  border-bottom:1px solid rgba(247,204,56,.3);flex-shrink:0
+}
+.sb-hdr-text{flex:1}
+.sb-eyebrow{font-size:.68rem;font-weight:900;letter-spacing:2px;color:rgba(247,204,56,.8)}
+.sb-main-title{font-size:1.05rem;font-weight:700;color:#fff}
+.sb-close{
+  background:none;border:none;cursor:pointer;
+  color:rgba(255,255,255,.55);font-size:1.55rem;line-height:1;
+  padding:4px;font-family:inherit;margin-left:10px
+}
+.sb-body{flex:1;overflow:auto;background:#14172a;-webkit-overflow-scrolling:touch}
+.sb-table{min-width:max-content}
+
+/* thead row */
+.sb-head-row{display:flex}
+.sb-name-th{
+  width:110px;height:54px;flex-shrink:0;
+  display:inline-flex;align-items:flex-end;padding:4px 8px;
+  background:#1e2340;
+  border-right:1px solid rgba(247,204,56,.25);
+  position:sticky;left:0;z-index:11;
+  font-size:.6rem;font-weight:900;letter-spacing:1.5px;color:rgba(247,204,56,.7)
+}
+.sb-col-th{
+  width:70px;height:54px;flex-shrink:0;
+  display:inline-flex;flex-direction:column;align-items:center;justify-content:flex-end;
+  padding:4px;background:#1e2340;
+  border-right:1px solid rgba(255,255,255,.05)
+}
+.sb-col-th.cur{background:rgba(242,112,90,.18)}
+.sb-col-th.peak{background:rgba(247,204,56,.10)}
+.sb-cards{font-size:.98rem;font-weight:900;color:#fff}
+.sb-cards.dim{color:rgba(255,255,255,.28)}
+.sb-cards.peak{color:var(--gold)}
+.sb-dir-up{font-size:.62rem;font-weight:700;color:#8fe8a8}
+.sb-dir-dn{font-size:.62rem;font-weight:700;color:#e88f8f}
+.sb-tot-th{
+  width:70px;height:54px;flex-shrink:0;
+  display:inline-flex;align-items:flex-end;justify-content:center;
+  padding:4px;background:rgba(16,19,32,.6);
+  border-left:1px solid rgba(247,204,56,.3);
+  font-size:.6rem;font-weight:900;letter-spacing:1.5px;color:var(--gold)
+}
+
+/* body rows */
+.sb-row{display:flex}
+.sb-name-td{
+  width:110px;height:70px;flex-shrink:0;
+  display:flex;align-items:center;gap:6px;padding:0 8px;
+  position:sticky;left:0;z-index:5;
+  background:rgba(16,19,32,.93);
+  border-right:1px solid rgba(247,204,56,.25)
+}
+.sb-row.even .sb-name-td{background:rgba(255,255,255,.025)}
+.sb-pnum{
+  width:22px;height:22px;border-radius:50%;
+  background:rgba(247,204,56,.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.68rem;font-weight:700;color:var(--gold);flex-shrink:0
+}
+.sb-pname{
+  font-size:.8rem;font-weight:700;color:#fff;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.sb-cell{
+  width:70px;height:70px;flex-shrink:0;
+  position:relative;border-right:1px solid rgba(255,255,255,.05)
+}
+.sb-row.even .sb-cell{background:rgba(255,255,255,.025)}
+.sb-cell.correct{background:rgba(21,64,37,.35)}
+.sb-cell.wrong{background:rgba(64,21,21,.3)}
+.sb-cell.curcol{border-bottom:2px solid var(--coral)}
+.sb-ci{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 6px 0;height:100%
+}
+.sb-g{font-size:1.05rem;font-weight:900;color:rgba(255,255,255,.5)}
+.sb-g.dim{color:rgba(255,255,255,.2)}
+.sb-glbl{font-size:.52rem;color:rgba(255,255,255,.25)}
+.sb-t{font-size:1.05rem;font-weight:900}
+.sb-t.cor{color:#8fe8a8}.sb-t.wrn{color:#e89898}
+.sb-t.q{color:rgba(255,255,255,.2)}
+.sb-badge{
+  position:absolute;top:3px;right:3px;
+  font-size:.62rem;font-weight:900;padding:2px 5px;border-radius:5px
+}
+.sb-badge.cor{background:#8fe8a8;color:#122a1c}
+.sb-badge.wrn{background:#e88f8f;color:#2a1212}
+.sb-tot-td{
+  width:70px;height:70px;flex-shrink:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  border-left:1px solid rgba(247,204,56,.3);
+  background:rgba(16,19,32,.5)
+}
+.sb-tot-num{font-size:1.2rem;font-weight:900}
+.sb-tot-num.pos{color:#8fe8a8}.sb-tot-num.neg{color:#e89898}.sb-tot-num.blank{color:rgba(255,255,255,.2)}
+.sb-tot-sub{font-size:.62rem;color:rgba(255,255,255,.35);font-weight:600}
+.sb-foot{
+  padding:12px 18px max(12px,calc(env(safe-area-inset-bottom) + 8px));background:#1e2340;
+  border-top:1px solid rgba(247,204,56,.3);
+  flex-shrink:0;display:flex;align-items:center;gap:10px
+}
+.sb-back{
+  background:none;border:1.5px solid rgba(247,204,56,.5);
+  color:var(--gold);border-radius:50px;
+  padding:8px 16px;cursor:pointer;
+  font-size:.88rem;font-weight:700;font-family:inherit;
+  display:flex;align-items:center;gap:5px;flex-shrink:0
+}
+.sb-legend{display:flex;gap:12px;margin-left:auto}
+.sb-leg-item{display:flex;align-items:center;gap:5px;font-size:.68rem;color:rgba(255,255,255,.5)}
+.sb-leg-dot{width:8px;height:8px;border-radius:50%}
+.sb-leg-dot.c{background:#8fe8a8}.sb-leg-dot.w{background:#e88f8f}
+
+/* ════════════════════════════════
+   GAME OVER
+════════════════════════════════ */
+#screen-game-over{background:linear-gradient(180deg,#1a1430,#281e48)}
+.go-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:28px 16px 50px}
+.trophy-ring{
+  width:128px;height:128px;border-radius:50%;
+  background:radial-gradient(circle,rgba(247,204,56,.15),rgba(247,204,56,.04));
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 14px;
+  animation:popIn .6s .1s cubic-bezier(.34,1.56,.64,1) both
+}
+.trophy-emoji{font-size:4rem}
+.go-title{
+  text-align:center;font-size:2.5rem;font-weight:900;
+  background:linear-gradient(135deg,var(--gold),#fce97a);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 4px 8px rgba(247,204,56,.4));
+  animation:titleIn .6s .3s ease both
+}
+.go-winner{
+  text-align:center;font-size:1.05rem;font-weight:700;
+  color:rgba(255,255,255,.9);margin-top:6px;
+  animation:fadeUp .5s .5s ease both
+}
+.standings-lbl{
+  font-size:.68rem;font-weight:900;letter-spacing:2px;
+  color:rgba(247,204,56,.7);text-align:center;margin:22px 0 12px
+}
+.standing-row{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 16px;border-radius:16px;margin-bottom:8px;
+  background:rgba(255,255,255,.06)
+}
+.standing-row.win{
+  background:rgba(247,204,56,.12);
+  border:1.5px solid rgba(247,204,56,.4)
+}
+.standing-medal{font-size:1.6rem;width:34px;text-align:center;flex-shrink:0}
+.standing-medal.num{font-size:1rem;font-weight:700;color:rgba(255,255,255,.5)}
+.standing-name{flex:1;font-size:.98rem;font-weight:700}
+.standing-name.win{color:var(--gold)}
+.standing-name.oth{color:rgba(255,255,255,.88)}
+.standing-pts{font-size:1.18rem;font-weight:900}
+.standing-pts.pos{color:#8fe8a8}.standing-pts.neg{color:#e89898}
+.sg{background:rgba(255,255,255,.05);border-radius:14px;padding:14px;margin-top:20px}
+.sg-title{font-size:.63rem;font-weight:900;letter-spacing:1.5px;color:rgba(255,255,255,.32);margin-bottom:10px}
+.sg-row{display:flex;gap:8px;align-items:center;font-size:.78rem;color:rgba(255,255,255,.52);margin-bottom:5px}
+.go-btns{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+
+/* ── UTILITY ── */
+.flex-col{display:flex;flex-direction:column}
+.gap-12{gap:12px}.gap-16{gap:16px}
+.mt-8{margin-top:8px}.mt-12{margin-top:12px}.mt-16{margin-top:16px}
+.w-full{width:100%}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ WELCOME ═══════════════ -->
+<div class="screen active" id="screen-welcome">
+  <div class="welcome-sky">
+    <div class="cloud c1"><div class="cloud-body"></div></div>
+    <div class="cloud c2"><div class="cloud-body"></div></div>
+    <div class="cloud c3"><div class="cloud-body"></div></div>
+
+    <div class="welcome-title-area">
+      <div class="welcome-title">Welcome!</div>
+      <div class="welcome-subtitle">Up &amp; Down the River</div>
+    </div>
+
+    <div class="welcome-corgi">
+      <img src="corgi_icon.png" alt="Up &amp; Down the River">
+    </div>
+  </div>
+
+  <!-- Water -->
+  <div class="water-wrap">
+    <svg class="water-svg" viewBox="0 0 800 88" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,44 C100,20 200,68 300,44 C400,20 500,68 600,44 C700,20 800,68 900,44 L1600,88 L0,88Z" fill="#5ab0e0"/>
+      <path d="M0,58 C100,36 200,80 300,58 C400,36 500,80 600,58 C700,36 800,80 900,58 L1600,88 L0,88Z" fill="#4198c8" opacity=".7"/>
+      <path d="M0,70 C100,54 200,88 300,70 C400,54 500,88 600,70 C700,54 800,88 900,70 L1600,88 L0,88Z" fill="#3280b0" opacity=".5"/>
+    </svg>
+  </div>
+
+  <div class="welcome-btn">
+    <button class="btn btn-coral" onclick="navigate('playerCount')">Let's Play! ▶</button>
+  </div>
+</div>
+
+<!-- ═══════════════ PLAYER COUNT ═══════════════ -->
+<div class="screen" id="screen-playerCount">
+  <div class="top-bar" style="display:flex;align-items:center;gap:4px">
+    <button class="back-btn" onclick="navigate('welcome')">‹</button>
+    <span style="font-size:1rem;font-weight:700;color:var(--dark)">Set up game</span>
+  </div>
+  <div class="scroll flex-col gap-16" style="padding-top:24px">
+    <div class="anim-fade-up" style="text-align:center">
+      <div style="font-size:3rem">🃏</div>
+      <h2 style="margin-top:8px;color:var(--dark)">How many players?</h2>
+    </div>
+
+    <div class="count-bubble anim-fade-up d1">
+      <div class="count-num" id="count-num">4</div>
+      <div class="count-lbl">players</div>
+      <div class="stepper-row">
+        <button class="stepper-btn stepper-minus" id="btn-minus" onclick="changeCount(-1)">−</button>
+        <button class="stepper-btn stepper-plus"  id="btn-plus"  onclick="changeCount(+1)">+</button>
+      </div>
+    </div>
+
+    <div class="info-card anim-fade-up d2">
+      <div class="info-row">
+        <span class="info-icon">♠️</span>
+        <span class="info-lbl">Max cards per hand</span>
+        <span class="info-val" id="info-max">12</span>
+      </div>
+      <div class="info-row">
+        <span class="info-icon">🔄</span>
+        <span class="info-lbl">Total rounds</span>
+        <span class="info-val" id="info-rounds">24</span>
+      </div>
+      <div class="info-row">
+        <span class="info-icon">↑</span>
+        <span class="info-lbl">Going up</span>
+        <span class="info-val" id="info-up">1 → 12 cards</span>
+      </div>
+      <div class="info-row">
+        <span class="info-icon">↓</span>
+        <span class="info-lbl">Coming down</span>
+        <span class="info-val" id="info-down">12 → 1 cards</span>
+      </div>
+    </div>
+
+    <div id="min-note" style="display:none">
+      <div style="background:rgba(45,173,184,.1);border-radius:12px;padding:10px 14px;display:flex;gap:8px;align-items:center;font-size:.84rem;color:var(--teal);font-weight:600">
+        ℹ️ Minimum 3 players required
+      </div>
+    </div>
+
+    <button class="btn btn-teal anim-fade-up d3" onclick="goToNames()">Set players →</button>
+  </div>
+</div>
+
+<!-- ═══════════════ PLAYER NAMES ═══════════════ -->
+<div class="screen" id="screen-playerNames">
+  <div class="names-hdr">
+    <button class="back-btn" onclick="navigate('playerCount')" style="margin-bottom:4px">‹</button>
+    <div class="names-title">Who's playing?</div>
+    <p style="margin-top:4px;font-size:.84rem;color:var(--mid)">Enter names clockwise from you</p>
+    <div class="dealer-note">🎩 <span>Player 1 deals first</span></div>
+  </div>
+  <div class="scroll flex-col gap-12" id="names-list" style="padding-top:14px"></div>
+  <div style="padding:12px 16px max(32px,calc(env(safe-area-inset-bottom) + 12px));flex-shrink:0">
+    <button class="btn" id="names-btn" onclick="goToGame()">Fill in all names</button>
+  </div>
+</div>
+
+<!-- ═══════════════ BETTING ═══════════════ -->
+<div class="screen" id="screen-betting">
+  <div class="top-bar">
+    <div class="bet-round-row">
+      <button class="back-btn" onclick="backFromBetting()">‹</button>
+      <div style="flex:1;min-width:0">
+        <div class="bet-round-cards" id="bet-cards">1 card dealt</div>
+        <div style="font-size:.78rem;color:var(--mid);font-weight:600;margin-top:1px" id="bet-dealer">–</div>
+      </div>
+      <div class="round-badge" id="bet-rnum">1 / 24</div>
+    </div>
+    <div class="prog-track mt-8">
+      <div class="prog-fill" id="bet-prog"></div>
+      <div class="prog-peak"></div>
+    </div>
+  </div>
+
+  <div class="scroll flex-col" style="padding:16px" id="bet-scroll">
+    <p style="font-size:.82rem;font-weight:600;color:var(--mid);margin-bottom:12px">Place your bets — betting order for this round</p>
+    <div id="all-bets-list"></div>
+
+    <div id="ban" class="ban" style="display:none;margin-bottom:12px">
+      <span class="ban-icon">⚠️</span>
+      <div>
+        <div class="ban-title">Dealer restriction</div>
+        <div class="ban-text" id="ban-text"></div>
+      </div>
+    </div>
+
+    <button class="btn btn-coral" id="confirm-btn" onclick="confirmBets()">Confirm Bets ✓</button>
+    <button class="btn btn-ghost" style="margin-top:8px" onclick="navigate('scoreboard')">📊 View scoreboard</button>
+  </div>
+</div>
+
+<!-- ═══════════════ RESULTS ═══════════════ -->
+<div class="screen" id="screen-results">
+  <div class="top-bar">
+    <div class="bet-round-row">
+      <button class="back-btn" onclick="backFromResults()">‹</button>
+      <div style="flex:1;min-width:0">
+        <div class="bet-round-cards" id="res-cards">1 card dealt</div>
+        <div class="prog-track mt-8" style="max-width:160px">
+          <div class="prog-fill" id="res-prog"></div>
+          <div class="prog-peak"></div>
+        </div>
+      </div>
+      <div class="round-badge" id="res-rnum">1 / 24</div>
+    </div>
+  </div>
+
+  <div class="scroll flex-col gap-16">
+    <div style="text-align:center;padding-top:4px">
+      <h2 style="color:var(--dark)">Round over! 🎴</h2>
+      <p style="margin-top:4px">How many tricks did everyone win?</p>
+    </div>
+
+    <div id="results-list" class="flex-col"></div>
+
+    <div class="val-card" id="val-card">
+      <span class="val-icon" id="val-icon">⭕</span>
+      <span class="val-text" id="val-text">Enter tricks for all players</span>
+    </div>
+
+    <div class="card" id="score-preview" style="display:none">
+      <div class="scp-title">Round scores</div>
+      <div id="scp-rows"></div>
+    </div>
+
+    <button class="btn btn-teal" id="res-btn" onclick="submitResults()" disabled>Next Round →</button>
+    <button class="btn btn-ghost" onclick="navigate('scoreboard')">📊 View scoreboard</button>
+  </div>
+</div>
+
+<!-- ═══════════════ SCOREBOARD ═══════════════ -->
+<div class="screen" id="screen-scoreboard">
+  <div class="sb-hdr">
+    <div class="sb-hdr-text">
+      <div class="sb-eyebrow">SCOREBOARD</div>
+      <div class="sb-main-title">Up &amp; Down the River</div>
+    </div>
+    <span style="font-size:1.4rem">🎩</span>
+    <button class="sb-close" onclick="closeSB()">✕</button>
+  </div>
+  <div class="sb-body" id="sb-body">
+    <div class="sb-table" id="sb-table"></div>
+  </div>
+  <div class="sb-foot">
+    <button class="sb-back" onclick="closeSB()">← Back</button>
+    <div class="sb-legend">
+      <div class="sb-leg-item"><div class="sb-leg-dot c"></div>Correct</div>
+      <div class="sb-leg-item"><div class="sb-leg-dot w"></div>Wrong</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ GAME OVER ═══════════════ -->
+<div class="screen" id="screen-gameOver">
+  <div class="go-scroll">
+    <button class="back-btn" onclick="navigate('scoreboard')" style="color:rgba(255,255,255,.5);margin-bottom:8px">‹ Scoreboard</button>
+    <div class="trophy-ring"><span class="trophy-emoji">🏆</span></div>
+    <div class="go-title">Game Over!</div>
+    <div class="go-winner" id="go-winner">– wins!</div>
+    <div class="standings-lbl">FINAL STANDINGS</div>
+    <div id="standings"></div>
+    <div class="sg">
+      <div class="sg-title">SCORING GUIDE</div>
+      <div class="sg-row">✅ Correct guess 0: +10 pts</div>
+      <div class="sg-row">✅ Correct guess N: +(10 + 2×N) pts</div>
+      <div class="sg-row">❌ Wrong: 10 − (3 × |guess−tricks|) pts</div>
+    </div>
+    <div class="go-btns">
+      <button class="btn btn-gold-outline" onclick="navigate('scoreboard')">📊 Full Scoreboard</button>
+      <button class="btn btn-coral" onclick="resetGame()">🔄 Play Again</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ── STATE ─────────────────────────────────────────────────────── */
+const S = {
+  screen: 'welcome',
+  numPlayers: 4,
+  playerNames: [],
+  rounds: [],
+  currentRoundIndex: 0,
+  dealerStartIndex: 0,
+  roundData: [],        // [roundIdx][playerIdx] = {guess,tricks}
+  currentBets: [],      // [playerIdx] = int | null
+  currentBettingIdx: 0,
+  currentTricks: [],    // [playerIdx] = int | null
+  selectedBet: 0,
+};
+
+/* ── HELPERS ───────────────────────────────────────────────────── */
+const maxCards  = () => Math.floor(50 / S.numPlayers);
+
+const buildRounds = () => {
+  const m = maxCards();
+  return [...Array.from({length:m},(_,i)=>i+1), ...Array.from({length:m},(_,i)=>m-i)];
+};
+
+const dealerIdx = (ri = S.currentRoundIndex) =>
+  (S.dealerStartIndex + ri) % S.numPlayers;
+
+const bettingOrder = () => {
+  const d = dealerIdx();
+  return Array.from({length:S.numPlayers}, (_,i) => (i + d + 1) % S.numPlayers);
+};
+
+
+const calcScore = (g, t) => {
+  if (g == null || t == null) return null;
+  return g === t ? 10 + 2*g : 10 - 3*Math.abs(g - t);
+};
+
+const totalScore = pi =>
+  S.roundData.reduce((s, r) => s + (calcScore(r[pi].guess, r[pi].tricks) ?? 0), 0);
+
+const ranked = () =>
+  Array.from({length:S.numPlayers}, (_,i) => ({i, name:S.playerNames[i], score:totalScore(i)}))
+    .sort((a,b) => b.score - a.score);
+
+const allDone = () =>
+  S.rounds.length > 0 && S.roundData.every(r => r.every(p => p.tricks != null));
+
+/* ── NAVIGATION ────────────────────────────────────────────────── */
+function navigate(screen) {
+  const from = document.getElementById('screen-' + S.screen);
+  const to   = document.getElementById('screen-' + screen);
+  if (!to) return;
+
+  if (from) {
+    from.style.opacity = '0';
+    setTimeout(() => { from.style.display = 'none'; from.classList.remove('active'); }, 220);
+  }
+
+  S.screen = screen;
+  setTimeout(() => {
+    to.style.opacity = '0';
+    to.style.display = 'flex';
+    to.classList.add('active');
+    requestAnimationFrame(() => {
+      to.style.opacity = '1';
+      render(screen);
+    });
+  }, 180);
+}
+
+function render(s) {
+  ({
+    playerCount: renderCount,
+    playerNames: renderNames,
+    betting:     renderBetting,
+    results:     renderResults,
+    scoreboard:  renderSB,
+    gameOver:    renderGameOver,
+  }[s] || (() => {}))();
+}
+
+/* ── PLAYER COUNT ──────────────────────────────────────────────── */
+function renderCount() { updateCountUI(); }
+
+function updateCountUI() {
+  const n  = S.numPlayers;
+  const mc = Math.floor(50 / n);
+  document.getElementById('count-num').textContent   = n;
+  document.getElementById('info-max').textContent    = mc;
+  document.getElementById('info-rounds').textContent = mc * 2;
+  document.getElementById('info-up').textContent     = `1 → ${mc} cards`;
+  document.getElementById('info-down').textContent   = `${mc} → 1 cards`;
+  document.getElementById('btn-minus').classList.toggle('off', n <= 3);
+  document.getElementById('btn-plus').classList.toggle('off', n >= 10);
+  document.getElementById('min-note').style.display = n === 3 ? 'block' : 'none';
+}
+
+function changeCount(d) {
+  const n = S.numPlayers + d;
+  if (n < 3 || n > 10) return;
+  S.numPlayers = n;
+  const el = document.getElementById('count-num');
+  el.style.transform = 'scale(1.3)';
+  setTimeout(() => { el.style.transform = ''; }, 160);
+  updateCountUI();
+}
+
+function goToNames() {
+  S.playerNames = Array(S.numPlayers).fill('');
+  navigate('playerNames');
+}
+
+/* ── PLAYER NAMES ──────────────────────────────────────────────── */
+function renderNames() {
+  const list = document.getElementById('names-list');
+  list.innerHTML = '';
+  for (let i = 0; i < S.numPlayers; i++) {
+    const isFirst = i === 0;
+    const div = document.createElement('div');
+    div.className = 'name-field anim-fade-up d' + Math.min(i+1, 6);
+    div.innerHTML = `
+      <div class="badge ${isFirst ? 'badge-coral' : 'badge-teal'}">${isFirst ? '🎩' : i+1}</div>
+      <input type="text" maxlength="20" inputmode="text" autocomplete="off" autocorrect="off"
+        placeholder="${isFirst ? 'Player 1 (first dealer)' : 'Player ' + (i+1)}"
+        value="${S.playerNames[i] || ''}">
+      <span id="ck${i}" style="color:var(--teal);font-size:1.1rem;visibility:${S.playerNames[i]?.trim()?'visible':'hidden'}">✓</span>
+    `;
+    list.appendChild(div);
+
+    const inp = div.querySelector('input');
+    inp.addEventListener('input', () => {
+      S.playerNames[i] = inp.value;
+      document.getElementById('ck'+i).style.visibility = inp.value.trim() ? 'visible' : 'hidden';
+      updateNameBtn();
+    });
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        const inputs = list.querySelectorAll('input');
+        if (i < S.numPlayers - 1) inputs[i+1].focus(); else inp.blur();
+      }
+    });
+  }
+  updateNameBtn();
+  setTimeout(() => {
+    const inputs = list.querySelectorAll('input');
+    const first = Array.from(inputs).find(inp => !inp.value.trim());
+    if (first) first.focus();
+  }, 350);
+}
+
+function updateNameBtn() {
+  const ok = S.playerNames.every(n => n.trim());
+  const btn = document.getElementById('names-btn');
+  btn.textContent = ok ? 'Start Game! 🎮' : 'Fill in all names';
+  btn.disabled = !ok;
+  btn.className = ok ? 'btn btn-coral' : 'btn';
+  if (!ok) {
+    btn.style.background = 'rgba(150,150,150,.25)';
+    btn.style.color = 'rgba(150,150,150,.7)';
+    btn.style.boxShadow = 'none';
+    btn.style.cursor = 'not-allowed';
+  } else {
+    btn.style.cssText = '';
+    btn.className = 'btn btn-coral';
+  }
+}
+
+function goToGame() {
+  if (!S.playerNames.every(n => n.trim())) return;
+  S.playerNames = S.playerNames.map(n => n.trim());
+  S.rounds = buildRounds();
+  S.roundData = S.rounds.map(() =>
+    Array.from({length:S.numPlayers}, () => ({guess:null, tricks:null}))
+  );
+  S.currentRoundIndex = 0;
+  S.dealerStartIndex = 0;
+  startBetting();
+  navigate('betting');
+}
+
+/* ── BETTING ───────────────────────────────────────────────────── */
+function startBetting() {
+  S.currentBets = Array(S.numPlayers).fill(0);
+}
+
+// Corgi icon (iOS app icon) for dealer indicator
+function miniCorgiSVG() {
+  return `<img src="corgi_icon.png" width="34" height="34" style="border-radius:50%;object-fit:cover;display:block">`;
+}
+
+// Restriction: cards - sum(non-dealer bets), if in [0..cards]
+function calcDealerRestriction() {
+  const cards = S.rounds[S.currentRoundIndex];
+  const d = dealerIdx();
+  const sumOthers = S.currentBets.reduce((s, b, i) => i !== d ? s + b : s, 0);
+  const r = cards - sumOthers;
+  return (r >= 0 && r <= cards) ? r : null;
+}
+
+function renderBetting() {
+  const ri    = S.currentRoundIndex;
+  const cards = S.rounds[ri];
+  const total = S.rounds.length;
+  const d     = dealerIdx();
+  const order = bettingOrder(); // [d+1, d+2, ..., d] — first-to-bet first, dealer last
+  const first = order[0];
+
+  document.getElementById('bet-rnum').textContent   = `${ri+1} / ${total}`;
+  document.getElementById('bet-cards').textContent  = `${cards} ${cards===1?'card':'cards'} dealt`;
+  document.getElementById('bet-dealer').textContent = `Dealer: ${S.playerNames[d]}`;
+  document.getElementById('bet-prog').style.width   = (total>1 ? ri/(total-1)*100 : 0) + '%';
+
+  const list = document.getElementById('all-bets-list');
+  list.innerHTML = '';
+
+  order.forEach(pi => {
+    const isFirst  = pi === first;
+    const isDeal   = pi === d;
+    const bet      = S.currentBets[pi];
+
+    let indicatorHtml;
+    if (isDeal) {
+      indicatorHtml = `<div class="bet-row-indicator">${miniCorgiSVG()}</div>`;
+    } else if (isFirst) {
+      indicatorHtml = `<div class="bet-row-indicator" style="font-size:1.4rem">🚩</div>`;
+    } else {
+      indicatorHtml = `<div class="bet-row-indicator"><div class="badge badge-teal">${pi+1}</div></div>`;
+    }
+
+    let roleHtml = '';
+    if (isFirst && isDeal) {
+      roleHtml = `<div class="bet-row-role deal">Dealer &amp; 1st to bet</div>`;
+    } else if (isFirst) {
+      roleHtml = `<div class="bet-row-role first">1st to bet</div>`;
+    } else if (isDeal) {
+      roleHtml = `<div class="bet-row-role deal">Dealer — bets last</div>`;
+    }
+
+    const div = document.createElement('div');
+    div.className = 'bet-all-row';
+    div.id = 'brow-' + pi;
+    div.innerHTML = `
+      <div class="bet-row-left">
+        ${indicatorHtml}
+        <div>
+          <div class="bet-row-name">${S.playerNames[pi]}</div>
+          ${roleHtml}
+        </div>
+      </div>
+      <div class="tricks-step">
+        <button class="trick-btn trick-btn-m${bet<=0?' off':''}"
+          onclick="changeBetFor(${pi},-1)">−</button>
+        <div class="trick-cnt" id="bsn-${pi}">${bet}</div>
+        <button class="trick-btn trick-btn-p${bet>=cards?' off':''}"
+          onclick="changeBetFor(${pi},1)">+</button>
+      </div>`;
+    list.appendChild(div);
+  });
+
+  updateBettingUI();
+}
+
+function changeBetFor(pi, delta) {
+  const cards = S.rounds[S.currentRoundIndex];
+  const next  = Math.max(0, Math.min(cards, S.currentBets[pi] + delta));
+  if (next === S.currentBets[pi]) return;
+  S.currentBets[pi] = next;
+  document.getElementById('bsn-' + pi).textContent = next;
+  const row = document.getElementById('brow-' + pi);
+  row.querySelectorAll('.trick-btn')[0].classList.toggle('off', next <= 0);
+  row.querySelectorAll('.trick-btn')[1].classList.toggle('off', next >= cards);
+  updateBettingUI();
+}
+
+function updateBettingUI() {
+  const d       = dealerIdx();
+  const restr   = calcDealerRestriction();
+  const blocked = restr !== null && S.currentBets[d] === restr;
+
+  // Highlight dealer row when blocked
+  document.querySelectorAll('.bet-all-row').forEach(r => r.classList.remove('dealer-blocked'));
+  if (blocked) {
+    const dr = document.getElementById('brow-' + d);
+    if (dr) dr.classList.add('dealer-blocked');
+  }
+
+  // Restriction banner
+  const ban = document.getElementById('ban');
+  if (restr !== null) {
+    ban.style.display = '';
+    const cards = S.rounds[S.currentRoundIndex];
+    document.getElementById('ban-text').textContent = blocked
+      ? `${S.playerNames[d]} is currently betting ${restr} — change their bet or adjust another player's`
+      : `${S.playerNames[d]} (dealer) cannot bet ${restr} — total tricks would equal ${cards}`;
+    ban.style.background = blocked ? '#fff0f0' : '#fff2ed';
+  } else {
+    ban.style.display = 'none';
+  }
+
+  document.getElementById('confirm-btn').disabled = blocked;
+}
+
+function confirmBets() {
+  if (document.getElementById('confirm-btn').disabled) return;
+  const ri = S.currentRoundIndex;
+  for (let i = 0; i < S.numPlayers; i++) {
+    S.roundData[ri][i].guess = S.currentBets[i];
+  }
+  S.currentTricks = Array(S.numPlayers).fill(0);
+  navigate('results');
+}
+
+/* ── RESULTS ───────────────────────────────────────────────────── */
+function renderResults() {
+  const ri    = S.currentRoundIndex;
+  const cards = S.rounds[ri];
+  const total = S.rounds.length;
+  const d     = dealerIdx();
+
+  document.getElementById('res-rnum').textContent  = `${ri+1} / ${total}`;
+  document.getElementById('res-cards').textContent = `${cards} ${cards===1?'card':'cards'} dealt`;
+  document.getElementById('res-prog').style.width  = (total>1 ? ri/(total-1)*100 : 0) + '%';
+
+  const isLast = ri >= total - 1;
+  document.getElementById('res-btn').textContent = isLast ? 'See Final Scores! 🏆' : 'Next Round →';
+
+  const list = document.getElementById('results-list');
+  list.innerHTML = '';
+  for (let i = 0; i < S.numPlayers; i++) {
+    const guess   = S.roundData[ri][i].guess ?? 0;
+    const isDealer = i === d;
+    const div = document.createElement('div');
+    div.className = 'res-row';
+    div.id = 'rrow' + i;
+    div.innerHTML = `
+      <div class="badge ${isDealer ? 'badge-coral' : 'badge-teal'}">${isDealer ? '🎩' : i+1}</div>
+      <div class="res-info">
+        <div class="res-name">${S.playerNames[i]}</div>
+        <div class="res-bet">Bet ${guess} trick${guess===1?'':'s'}</div>
+      </div>
+      <div class="tricks-step">
+        <button class="trick-btn trick-btn-m off" data-p="${i}" data-d="-1">−</button>
+        <div class="trick-cnt" id="tc${i}">0</div>
+        <button class="trick-btn trick-btn-p" data-p="${i}" data-d="1">+</button>
+      </div>
+    `;
+    list.appendChild(div);
+  }
+
+  // Wire up trick buttons via event delegation
+  list.addEventListener('click', e => {
+    const btn = e.target.closest('.trick-btn');
+    if (!btn || btn.classList.contains('off')) return;
+    const pi = parseInt(btn.dataset.p);
+    const delta = parseInt(btn.dataset.d);
+    changeTricks(pi, delta);
+  });
+
+  updateResultsUI();
+}
+
+function changeTricks(pi, delta) {
+  const cur  = S.currentTricks[pi] ?? 0;
+  const next = cur + delta;
+  if (next < 0) return;
+  S.currentTricks[pi] = next;
+  document.getElementById('tc' + pi).textContent = next;
+
+  const row = document.getElementById('rrow' + pi);
+  const [minus, plus] = row.querySelectorAll('.trick-btn');
+  minus.classList.toggle('off', next <= 0);
+  plus.classList.remove('off');
+  updateResultsUI();
+}
+
+function updateResultsUI() {
+  const ri    = S.currentRoundIndex;
+  const cards = S.rounds[ri];
+  const sum   = S.currentTricks.reduce((s, t) => s + t, 0);
+  const valid = sum === cards;
+
+  const icon = document.getElementById('val-icon');
+  const text = document.getElementById('val-text');
+
+  if (!valid) {
+    const over = sum > cards;
+    icon.textContent = over ? '❌' : '⭕';
+    icon.style.color = over ? 'var(--coral)' : '';
+    text.textContent = over
+      ? `Total is ${sum} — must equal ${cards} (${sum - cards} too many)`
+      : `${sum} of ${cards} tricks assigned`;
+    text.style.color = over ? 'var(--coral)' : '';
+  } else {
+    icon.textContent = '✅'; icon.style.color = 'var(--teal)';
+    text.textContent = `Total tricks: ${sum} ✓ Matches ${cards} cards dealt`;
+    text.style.color = 'var(--teal)';
+  }
+
+  const preview = document.getElementById('score-preview');
+  if (valid) {
+    preview.style.display = '';
+    const rows = document.getElementById('scp-rows');
+    rows.innerHTML = '';
+    for (let i = 0; i < S.numPlayers; i++) {
+      const g  = S.roundData[ri][i].guess ?? 0;
+      const t  = S.currentTricks[i] ?? 0;
+      const sc = calcScore(g, t);
+      const ok = g === t;
+      const div = document.createElement('div');
+      div.className = 'scp-row';
+      div.innerHTML = `
+        <span class="scp-name">${S.playerNames[i]}</span>
+        <span class="scp-pts ${sc >= 0 ? 'pts-pos' : 'pts-neg'}">
+          ${ok ? '✅' : '❌'} ${sc >= 0 ? '+' : ''}${sc} pts
+        </span>`;
+      rows.appendChild(div);
+    }
+  } else {
+    preview.style.display = 'none';
+  }
+
+  document.getElementById('res-btn').disabled = !valid;
+}
+
+function submitResults() {
+  const ri = S.currentRoundIndex;
+  for (let i = 0; i < S.numPlayers; i++) {
+    S.roundData[ri][i].tricks = S.currentTricks[i];
+  }
+  if (ri < S.rounds.length - 1) {
+    S.currentRoundIndex++;
+    startBetting();
+    navigate('betting');
+  } else {
+    navigate('gameOver');
+  }
+}
+
+/* ── SCOREBOARD ────────────────────────────────────────────────── */
+function renderSB() {
+  const mc  = maxCards();
+  const n   = S.numPlayers;
+  const rds = S.rounds;
+  const cur = S.currentRoundIndex;
+
+  // Header row
+  let h = '<div class="sb-head-row">';
+  h += '<div class="sb-name-th">PLAYERS</div>';
+  for (let ri = 0; ri < rds.length; ri++) {
+    const cards   = rds[ri];
+    const isPeak  = cards === mc;
+    const isCur   = ri === cur;
+    const isBeyond = ri > cur;
+    const isFirst = ri < mc;
+    const dName   = S.playerNames[dealerIdx(ri)];
+    const cls = ['sb-col-th', isCur ? 'cur' : '', isPeak ? 'peak' : ''].filter(Boolean).join(' ');
+    const numCls = isBeyond ? 'dim' : isPeak ? 'peak' : '';
+    const dir = isPeak ? '' :
+      `<span class="${isFirst ? 'sb-dir-up' : 'sb-dir-dn'}">${isFirst ? '↑' : '↓'}</span>`;
+    h += `<div class="${cls}">
+      ${dir}
+      <span class="sb-cards ${numCls}">${cards}</span>
+      <span title="${dName}" style="font-size:.8rem">🎩</span>
+    </div>`;
+  }
+  h += '<div class="sb-tot-th">TOTAL</div>';
+  h += '</div>';
+
+  // Player rows
+  let rows = '';
+  for (let pi = 0; pi < n; pi++) {
+    const even = pi % 2 === 0;
+    rows += `<div class="sb-row${even ? ' even' : ''}">`;
+    rows += `<div class="sb-name-td">
+      <div class="sb-pnum">${pi+1}</div>
+      <div class="sb-pname">${S.playerNames[pi]}</div>
+    </div>`;
+
+    for (let ri = 0; ri < rds.length; ri++) {
+      const dt      = S.roundData[ri][pi];
+      const isCur   = ri === cur;
+      const isBeyond = ri > cur;
+      const correct = dt.guess != null && dt.tricks != null && dt.guess === dt.tricks;
+      const wrong   = dt.guess != null && dt.tricks != null && dt.guess !== dt.tricks;
+      const sc      = calcScore(dt.guess, dt.tricks);
+      let cls = 'sb-cell';
+      if (correct) cls += ' correct';
+      if (wrong)   cls += ' wrong';
+      if (isCur)   cls += ' curcol';
+
+      let inner = '';
+      if (dt.guess == null && !isCur) {
+        inner = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:rgba(255,255,255,.15);font-size:.88rem">—</div>`;
+      } else if (dt.guess != null) {
+        const gCol = isBeyond ? 'rgba(255,255,255,.18)' : dt.tricks == null ? 'rgba(255,255,255,.5)' : 'rgba(255,255,255,.75)';
+        const tPart = dt.tricks != null
+          ? `<div style="display:flex;flex-direction:column;align-items:center">
+               <span class="sb-t ${correct?'cor':'wrn'}">${dt.tricks}</span>
+               <span style="font-size:.5rem;color:rgba(255,255,255,.25)">got</span>
+             </div>`
+          : `<span class="sb-t q">?</span>`;
+        inner = `
+          <div class="sb-ci">
+            <div style="display:flex;flex-direction:column;align-items:center">
+              <span class="sb-g" style="color:${gCol}">${dt.guess}</span>
+              <span class="sb-glbl">bet</span>
+            </div>
+            ${tPart}
+          </div>
+          ${sc != null ? `<div class="sb-badge ${correct?'cor':'wrn'}">${sc}</div>` : ''}`;
+      }
+      rows += `<div class="${cls}">${inner}</div>`;
+    }
+
+    const hasAny = S.roundData.some(r => r[pi].tricks != null);
+    const tot = hasAny ? totalScore(pi) : null;
+    rows += `<div class="sb-tot-td">
+      <div class="sb-tot-num ${tot==null?'blank':tot>=0?'pos':'neg'}">${tot==null?'—':tot}</div>
+      ${tot!=null?'<div class="sb-tot-sub">pts</div>':''}
+    </div>`;
+    rows += '</div>';
+  }
+
+  document.getElementById('sb-table').innerHTML =
+    `<div class="sb-thead">${h}</div>${rows}`;
+
+  // Scroll so current round is visible
+  setTimeout(() => {
+    const body = document.getElementById('sb-body');
+    const x = 110 + cur * 70 - body.clientWidth / 2 + 35;
+    body.scrollLeft = Math.max(0, x);
+  }, 120);
+}
+
+function closeSB() {
+  if (allDone()) { navigate('gameOver'); return; }
+  if (S.currentRoundIndex >= S.rounds.length) { navigate('gameOver'); return; }
+  if (S.roundData[S.currentRoundIndex]?.every(p => p.guess != null)) {
+    navigate('results');
+  } else {
+    navigate('betting');
+  }
+}
+
+/* ── GAME OVER ─────────────────────────────────────────────────── */
+function renderGameOver() {
+  const r = ranked();
+  document.getElementById('go-winner').textContent = `🏆 ${r[0].name} wins!`;
+  const medals = ['🥇','🥈','🥉'];
+  const list = document.getElementById('standings');
+  list.innerHTML = '';
+  r.forEach((p, pos) => {
+    const isWin = pos === 0;
+    const medal = medals[pos] || `${pos+1}.`;
+    const div = document.createElement('div');
+    div.className = `standing-row${isWin ? ' win' : ''} anim-fade-up`;
+    div.style.animationDelay = (pos * 0.1 + 0.3) + 's';
+    div.innerHTML = `
+      <div class="standing-medal${pos>=3?' num':''}">${medal}</div>
+      <div class="standing-name ${isWin?'win':'oth'}">${p.name}</div>
+      <div class="standing-pts ${p.score>=0?'pos':'neg'}">${p.score} pts</div>`;
+    list.appendChild(div);
+  });
+}
+
+/* ── RESET ─────────────────────────────────────────────────────── */
+function resetGame() {
+  S.numPlayers = 4;
+  S.playerNames = [];
+  S.rounds = [];
+  S.roundData = [];
+  S.currentRoundIndex = 0;
+  S.currentBets = [];
+  S.currentTricks = [];
+  navigate('playerCount');
+}
+
+/* ── BACK NAVIGATION ───────────────────────────────────────────── */
+function backFromBetting() {
+  if (S.currentRoundIndex === 0) {
+    navigate('playerNames');
+  } else {
+    S.currentRoundIndex--;
+    const ri = S.currentRoundIndex;
+    S.currentTricks = S.roundData[ri].map(p => p.tricks ?? 0);
+    navigate('results');
+  }
+}
+
+function backFromResults() {
+  const ri = S.currentRoundIndex;
+  S.currentBets = S.roundData[ri].map(p => p.guess ?? 0);
+  navigate('betting');
+}
+</script>
+</body>
+</html>
