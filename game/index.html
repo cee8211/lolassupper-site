@@ -342,9 +342,36 @@ html,body{height:100%;width:100%;overflow:hidden;
   background:#fff;border-radius:16px;padding:12px 14px;
   box-shadow:0 2px 8px rgba(0,0,0,.05);margin-bottom:10px
 }
+.res-row.leads-first{
+  border:2px solid var(--teal);
+  box-shadow:0 2px 12px rgba(45,173,184,.2)
+}
 .res-info{flex:1;min-width:0}
 .res-name{font-size:.98rem;font-weight:700;color:var(--dark)}
 .res-bet{font-size:.78rem;color:var(--mid);margin-top:1px}
+.res-leads-badge{
+  display:inline-block;font-size:.65rem;font-weight:900;
+  letter-spacing:.5px;color:#fff;background:var(--teal);
+  border-radius:6px;padding:1px 6px;margin-left:6px;vertical-align:middle
+}
+/* ── LICK & STICK MODAL ── */
+#lick-stick-modal{
+  position:fixed;inset:0;z-index:9999;
+  background:rgba(26,20,48,.93);
+  display:none;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:32px;text-align:center
+}
+.lick-title{
+  font-size:2.6rem;font-weight:900;
+  background:linear-gradient(135deg,var(--gold),#fce97a);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 4px 8px rgba(247,204,56,.4));
+  margin-bottom:6px
+}
+.lick-sub{
+  color:rgba(255,255,255,.65);font-size:.95rem;margin-bottom:28px
+}
 .tricks-step{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .trick-btn{
   background:none;border:none;cursor:pointer;
@@ -768,6 +795,18 @@ html,body{height:100%;width:100%;overflow:hidden;
   </div>
 </div>
 
+<!-- ═══════════════ LICK & STICK MODAL ═══════════════ -->
+<div id="lick-stick-modal">
+  <img src="lick_stick_corgi.jpg" alt="Lick &amp; Stick corgi"
+    style="width:200px;height:200px;object-fit:cover;border-radius:28px;
+           margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,.4)">
+  <div class="lick-title">Lick &amp; Stick!</div>
+  <div class="lick-sub">Last round — one card each. No mercy.</div>
+  <button class="btn btn-gold" onclick="dismissLickAndStick()" style="min-width:220px">
+    Play Last Round 🃏
+  </button>
+</div>
+
 <script>
 'use strict';
 
@@ -1083,12 +1122,27 @@ function confirmBets() {
   navigate('results');
 }
 
+// Returns the player index who leads (plays first) this round:
+// highest bet; ties broken by first clockwise from dealer.
+function leadPlayerIdx() {
+  const ri   = S.currentRoundIndex;
+  const d    = dealerIdx(ri);
+  const bets = S.roundData[ri].map(p => p.guess ?? 0);
+  const max  = Math.max(...bets);
+  for (let offset = 1; offset <= S.numPlayers; offset++) {
+    const pi = (d + offset) % S.numPlayers;
+    if (bets[pi] === max) return pi;
+  }
+  return (d + 1) % S.numPlayers;
+}
+
 /* ── RESULTS ───────────────────────────────────────────────────── */
 function renderResults() {
   const ri    = S.currentRoundIndex;
   const cards = S.rounds[ri];
   const total = S.rounds.length;
   const d     = dealerIdx();
+  const lead  = leadPlayerIdx();
 
   document.getElementById('res-rnum').textContent  = `${ri+1} / ${total}`;
   document.getElementById('res-cards').textContent = `${cards} ${cards===1?'card':'cards'} dealt`;
@@ -1100,15 +1154,16 @@ function renderResults() {
   const list = document.getElementById('results-list');
   list.innerHTML = '';
   for (let i = 0; i < S.numPlayers; i++) {
-    const guess   = S.roundData[ri][i].guess ?? 0;
+    const guess    = S.roundData[ri][i].guess ?? 0;
     const isDealer = i === d;
+    const isLead   = i === lead;
     const div = document.createElement('div');
-    div.className = 'res-row';
+    div.className = 'res-row' + (isLead ? ' leads-first' : '');
     div.id = 'rrow' + i;
     div.innerHTML = `
       <div class="badge ${isDealer ? 'badge-coral' : 'badge-teal'}">${isDealer ? '🎩' : i+1}</div>
       <div class="res-info">
-        <div class="res-name">${S.playerNames[i]}</div>
+        <div class="res-name">${S.playerNames[i]}${isLead ? '<span class="res-leads-badge">▶ LEADS</span>' : ''}</div>
         <div class="res-bet">Bet ${guess} trick${guess===1?'':'s'}</div>
       </div>
       <div class="tricks-step">
@@ -1194,10 +1249,23 @@ function submitResults() {
   if (ri < S.rounds.length - 1) {
     S.currentRoundIndex++;
     startBetting();
-    navigate('betting');
+    if (S.currentRoundIndex === S.rounds.length - 1) {
+      showLickAndStick();
+    } else {
+      navigate('betting');
+    }
   } else {
     navigate('gameOver');
   }
+}
+
+function showLickAndStick() {
+  document.getElementById('lick-stick-modal').style.display = 'flex';
+}
+
+function dismissLickAndStick() {
+  document.getElementById('lick-stick-modal').style.display = 'none';
+  navigate('betting');
 }
 
 /* ── SCOREBOARD ────────────────────────────────────────────────── */
