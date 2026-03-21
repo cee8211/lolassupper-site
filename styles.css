@@ -36,8 +36,8 @@
 
   /* Fonts */
   --ff-display:  'Bebas Neue', sans-serif;
-  --ff-serif:    'Playfair Display', Georgia, serif;
-  --ff-sans:     'Inter', system-ui, sans-serif;
+  --ff-serif:    'Cormorant Garamond', Georgia, serif;
+  --ff-sans:     'Cormorant Garamond', Georgia, serif;
 
   --radius:      4px;
   --ease:        cubic-bezier(0.4, 0, 0.2, 1);
