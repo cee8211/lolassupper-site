@@ -1388,6 +1388,18 @@ body {
 }
 .footer-email:hover { color: var(--text); }
 
+.footer-instagram {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  color: var(--text-mid);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-instagram:hover { color: var(--text); }
+
 /* ================================================================
    RESPONSIVE
    ================================================================ */
