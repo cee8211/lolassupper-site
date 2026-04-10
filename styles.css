@@ -212,11 +212,18 @@ body {
 
 .hero-title {
   font-family: var(--ff-display);
-  font-size: clamp(5.5rem, 19vw, 22rem);
+  font-size: clamp(4.95rem, 17.1vw, 19.8rem);
   line-height: 0.88;
   letter-spacing: -0.01em;
   color: var(--red);
   margin-bottom: 2.25rem;
+}
+
+.hero-sub-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 3rem;
 }
 
 .hero-sub {
@@ -224,7 +231,6 @@ body {
   font-style: italic;
   font-size: clamp(1rem, 2.2vw, 1.35rem);
   color: var(--text-mid);
-  margin-bottom: 3rem;
   max-width: 380px;
 }
 
@@ -247,9 +253,6 @@ body {
 }
 
 .hero-scroll {
-  position: absolute;
-  bottom: 3rem;
-  right: 3rem;
   display: flex;
   flex-direction: column;
   align-items: center;
