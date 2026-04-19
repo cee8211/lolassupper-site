@@ -603,6 +603,9 @@ html,body{height:100%;width:100%;overflow:hidden;
   </div>
 
   <div class="welcome-btn">
+    <div id="resume-wrap" style="display:none;margin-bottom:12px">
+      <button class="btn btn-teal" onclick="resumeGame()">▶ Resume Game</button>
+    </div>
     <button class="btn btn-coral" onclick="navigate('playerCount')">Let's Play! ▶</button>
   </div>
 </div>
@@ -807,6 +810,7 @@ html,body{height:100%;width:100%;overflow:hidden;
   </div>
   <div class="sb-foot">
     <button class="sb-back" onclick="closeSB()">← Back</button>
+    <button class="sb-back" style="margin-left:6px;border-color:rgba(242,112,90,.5);color:var(--coral)" onclick="confirmReset()">↺ New Game</button>
     <div class="sb-legend">
       <div class="sb-leg-item"><div class="sb-leg-dot c"></div>Correct</div>
       <div class="sb-leg-item"><div class="sb-leg-dot w"></div>Wrong</div>
@@ -834,7 +838,20 @@ html,body{height:100%;width:100%;overflow:hidden;
     </div>
     <div class="go-btns" id="go-btns" style="display:none">
       <button class="btn btn-gold-outline" onclick="navigate('scoreboard')">📊 Full Scoreboard</button>
-      <button class="btn btn-coral" onclick="resetGame()">🔄 Play Again</button>
+      <button class="btn btn-coral" onclick="confirmReset()">🔄 Play Again</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ RESET CONFIRMATION MODAL ═══════════════ -->
+<div id="reset-modal" style="position:fixed;inset:0;z-index:9998;background:rgba(37,37,53,.88);display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center">
+  <div style="background:#fff;border-radius:28px;padding:28px 24px;max-width:320px;width:100%;box-shadow:0 16px 48px rgba(0,0,0,.3)">
+    <div style="font-size:2.5rem;margin-bottom:12px">🔄</div>
+    <div style="font-size:1.3rem;font-weight:900;color:var(--dark);margin-bottom:8px">Start a new game?</div>
+    <div style="font-size:.9rem;color:var(--mid);margin-bottom:24px">All current scores and progress will be lost.</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn btn-coral" onclick="doReset()">Yes, start over</button>
+      <button class="btn btn-ghost" onclick="dismissReset()">Keep playing</button>
     </div>
   </div>
 </div>
@@ -870,6 +887,36 @@ const S = {
   currentTricks: [],    // [playerIdx] = int | null
   selectedBet: 0,
 };
+
+/* ── PERSISTENCE ────────────────────────────────────────────────── */
+const SAVE_KEY = 'udtr_v1';
+
+function saveState() {
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch(e) {}
+}
+
+function clearSave() {
+  try { localStorage.removeItem(SAVE_KEY); } catch(e) {}
+}
+
+function hasSavedGame() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return false;
+    const s = JSON.parse(raw);
+    return !!(s && s.rounds && s.rounds.length > 0 && s.playerNames && s.playerNames.length > 0);
+  } catch(e) { return false; }
+}
+
+function resumeGame() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SAVE_KEY));
+    const targetScreen = s.screen;
+    Object.assign(S, s);
+    S.screen = 'welcome'; // ensure navigate() hides the welcome screen
+    navigate(targetScreen);
+  } catch(e) { navigate('playerCount'); }
+}
 
 /* ── HELPERS ───────────────────────────────────────────────────── */
 const maxCards  = () => Math.floor(50 / S.numPlayers);
@@ -1068,6 +1115,7 @@ function startGame() {
   S.currentRoundIndex = 0;
   S.dealerStartIndex  = 0;
   startBetting();
+  saveState();
   navigate('betting');
 }
 
@@ -1200,6 +1248,7 @@ function confirmBets() {
     S.roundData[ri][i].guess = S.currentBets[i];
   }
   S.currentTricks = Array(S.numPlayers).fill(0);
+  saveState();
   navigate('results');
 }
 
@@ -1327,6 +1376,7 @@ function submitResults() {
   for (let i = 0; i < S.numPlayers; i++) {
     S.roundData[ri][i].tricks = S.currentTricks[i];
   }
+  saveState();
   if (ri < S.rounds.length - 1) {
     S.currentRoundIndex++;
     startBetting();
@@ -1513,6 +1563,7 @@ function revealFinalScores() {
 
 /* ── RESET ─────────────────────────────────────────────────────── */
 function resetGame() {
+  clearSave();
   S.numPlayers = 4;
   S.playerNames = [];
   S.selectedPeak = 0;
@@ -1522,7 +1573,22 @@ function resetGame() {
   S.currentRoundIndex = 0;
   S.currentBets = [];
   S.currentTricks = [];
+  document.getElementById('resume-wrap').style.display = 'none';
   navigate('playerCount');
+}
+
+/* ── RESET CONFIRMATION ──────────────────────────────────────────── */
+function confirmReset() {
+  document.getElementById('reset-modal').style.display = 'flex';
+}
+
+function dismissReset() {
+  document.getElementById('reset-modal').style.display = 'none';
+}
+
+function doReset() {
+  dismissReset();
+  resetGame();
 }
 
 /* ── BACK NAVIGATION ───────────────────────────────────────────── */
@@ -1542,6 +1608,13 @@ function backFromResults() {
   S.currentBets = S.roundData[ri].map(p => p.guess ?? 0);
   navigate('betting');
 }
+
+// Show resume button if a saved game exists
+document.addEventListener('DOMContentLoaded', () => {
+  if (hasSavedGame()) {
+    document.getElementById('resume-wrap').style.display = '';
+  }
+});
 
 // Wire up trick buttons once via event delegation
 document.getElementById('results-list').addEventListener('click', e => {
