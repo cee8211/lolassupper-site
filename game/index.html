@@ -567,6 +567,27 @@ html,body{height:100%;width:100%;overflow:hidden;
 .sg-row{display:flex;gap:8px;align-items:center;font-size:.78rem;color:rgba(255,255,255,.52);margin-bottom:5px}
 .go-btns{display:flex;flex-direction:column;gap:10px;margin-top:20px}
 
+/* ════════════════════════════════
+   MODE TOGGLE + CUSTOM ROUNDS
+════════════════════════════════ */
+.mode-toggle{display:flex;border-radius:14px;overflow:hidden;border:1.5px solid rgba(45,173,184,.3);background:rgba(45,173,184,.05)}
+.mode-btn{flex:1;padding:12px 8px;border:none;cursor:pointer;font-size:.88rem;font-weight:700;font-family:inherit;background:transparent;color:var(--mid);transition:background .15s,color .15s;line-height:1.2}
+.mode-btn.active{background:var(--teal);color:#fff}
+.custom-rounds-wrap{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,.07)}
+.cr-head{display:grid;grid-template-columns:36px 56px 1fr 48px;padding:9px 14px;border-bottom:1px solid rgba(0,0,0,.06)}
+.cr-head span{font-size:.65rem;font-weight:900;letter-spacing:1px;color:var(--mid)}
+.cr-row{display:grid;grid-template-columns:36px 56px 1fr 48px;align-items:center;padding:11px 14px;border-bottom:1px solid rgba(0,0,0,.04);transition:opacity .15s}
+.cr-row:last-child{border-bottom:none}
+.cr-row.cr-peak{background:rgba(247,204,56,.07)}
+.cr-row.cr-off{opacity:.38}
+.cr-idx{font-size:.8rem;font-weight:700;color:var(--mid)}
+.cr-cards{font-size:1.05rem;font-weight:900;color:var(--dark)}
+.cr-dir{font-size:.75rem;font-weight:700}
+.cr-dir.up{color:#3db87a}.cr-dir.dn{color:var(--coral)}.cr-dir.pk{color:var(--gold)}
+.cr-chk{display:flex;justify-content:flex-end;align-items:center}
+.cr-chk-btn{width:28px;height:28px;border-radius:8px;border:2px solid rgba(0,0,0,.15);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem;transition:background .12s,border-color .12s;color:transparent;font-family:inherit}
+.cr-chk-btn.on{background:var(--teal);border-color:var(--teal);color:#fff}
+
 /* ── UTILITY ── */
 .flex-col{display:flex;flex-direction:column}
 .gap-12{gap:12px}.gap-16{gap:16px}
@@ -718,7 +739,20 @@ html,body{height:100%;width:100%;overflow:hidden;
       </div>
     </div>
 
-    <button class="btn btn-coral anim-fade-up d3" onclick="startGame()">Start Game! 🎮</button>
+    <div class="anim-fade-up d3">
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="mode-std" onclick="setGameMode('standard')">Standard</button>
+        <button class="mode-btn" id="mode-cust" onclick="setGameMode('custom')">✏️ Custom Rounds</button>
+      </div>
+    </div>
+
+    <div id="custom-rounds-section" style="display:none" class="anim-fade-up">
+      <p style="font-size:.82rem;color:var(--mid);text-align:center;margin-bottom:10px">Select which rounds to play</p>
+      <div class="custom-rounds-wrap" id="custom-rounds-wrap"></div>
+      <p id="custom-rounds-note" style="font-size:.75rem;color:var(--mid);text-align:center;margin-top:8px"></p>
+    </div>
+
+    <button class="btn btn-coral anim-fade-up d4" id="start-game-btn" onclick="startGame()">Start Game! 🎮</button>
   </div>
 </div>
 
@@ -886,6 +920,8 @@ const S = {
   currentBettingIdx: 0,
   currentTricks: [],    // [playerIdx] = int | null
   selectedBet: 0,
+  gameMode: 'standard', // 'standard' | 'custom'
+  customRoundFlags: [], // [bool] per round index
 };
 
 /* ── PERSISTENCE ────────────────────────────────────────────────── */
@@ -913,6 +949,8 @@ function resumeGame() {
     const s = JSON.parse(localStorage.getItem(SAVE_KEY));
     const targetScreen = s.screen;
     Object.assign(S, s);
+    if (!S.gameMode) S.gameMode = 'standard';
+    if (!S.customRoundFlags) S.customRoundFlags = [];
     S.screen = 'welcome'; // ensure navigate() hides the welcome screen
     navigate(targetScreen);
   } catch(e) { navigate('playerCount'); }
@@ -921,10 +959,8 @@ function resumeGame() {
 /* ── HELPERS ───────────────────────────────────────────────────── */
 const maxCards  = () => Math.floor(50 / S.numPlayers);
 
-const buildRounds = () => {
-  const m = maxCards();
-  return [...Array.from({length:m},(_,i)=>i+1), ...Array.from({length:m},(_,i)=>m-i)];
-};
+const buildRounds = (m = maxCards()) =>
+  [...Array.from({length:m},(_,i)=>i+1), ...Array.from({length:m-1},(_,i)=>m-1-i)];
 
 const dealerIdx = (ri = S.currentRoundIndex) =>
   (S.dealerStartIndex + ri) % S.numPlayers;
@@ -993,7 +1029,7 @@ function updateCountUI() {
   const mc = Math.floor(50 / n);
   document.getElementById('count-num').textContent   = n;
   document.getElementById('info-max').textContent    = mc;
-  document.getElementById('info-rounds').textContent = mc * 2;
+  document.getElementById('info-rounds').textContent = mc * 2 - 1;
   document.getElementById('info-up').textContent     = `1 → ${mc} cards`;
   document.getElementById('info-down').textContent   = `${mc} → 1 cards`;
   document.getElementById('btn-minus').classList.toggle('off', n <= 3);
@@ -1081,13 +1117,84 @@ function goToGame() {
 /* ── ROUND SETUP ───────────────────────────────────────────────── */
 function renderRoundSetup() {
   updatePeakUI();
+  document.getElementById('mode-std').classList.toggle('active', S.gameMode !== 'custom');
+  document.getElementById('mode-cust').classList.toggle('active', S.gameMode === 'custom');
+  const section = document.getElementById('custom-rounds-section');
+  section.style.display = S.gameMode === 'custom' ? '' : 'none';
+  if (S.gameMode === 'custom') renderCustomRounds();
+}
+
+function setGameMode(mode) {
+  S.gameMode = mode;
+  document.getElementById('mode-std').classList.toggle('active', mode !== 'custom');
+  document.getElementById('mode-cust').classList.toggle('active', mode === 'custom');
+  const section = document.getElementById('custom-rounds-section');
+  section.style.display = mode === 'custom' ? '' : 'none';
+  if (mode === 'custom') renderCustomRounds();
+  // Re-enable start button when switching back to standard
+  if (mode === 'standard') {
+    const btn = document.getElementById('start-game-btn');
+    if (btn) { btn.disabled = false; btn.style.opacity = ''; btn.style.pointerEvents = ''; }
+  }
+}
+
+function renderCustomRounds() {
+  const p = S.selectedPeak;
+  const allRounds = buildRounds(p);
+  if (S.customRoundFlags.length !== allRounds.length) {
+    S.customRoundFlags = allRounds.map(() => true);
+  }
+  const wrap = document.getElementById('custom-rounds-wrap');
+  let html = `<div class="cr-head">
+    <span>#</span><span>CARDS</span><span>DIR</span><span>PLAY</span>
+  </div>`;
+  allRounds.forEach((cards, ri) => {
+    const isPeak = ri === p - 1;
+    const isUp   = ri < p - 1;
+    const on     = S.customRoundFlags[ri];
+    const dirLabel = isPeak ? '★ Peak' : isUp ? '↑ Up' : '↓ Down';
+    const dirCls   = isPeak ? 'pk'     : isUp ? 'up'   : 'dn';
+    html += `<div class="cr-row${isPeak ? ' cr-peak' : ''}${!on ? ' cr-off' : ''}" id="cr-row-${ri}">
+      <div class="cr-idx">${ri + 1}</div>
+      <div class="cr-cards">${cards}</div>
+      <div class="cr-dir ${dirCls}">${dirLabel}</div>
+      <div class="cr-chk">
+        <button class="cr-chk-btn${on ? ' on' : ''}" onclick="toggleCustomRound(${ri})">✓</button>
+      </div>
+    </div>`;
+  });
+  wrap.innerHTML = html;
+  updateCustomNote();
+}
+
+function toggleCustomRound(ri) {
+  S.customRoundFlags[ri] = !S.customRoundFlags[ri];
+  const row = document.getElementById('cr-row-' + ri);
+  row.classList.toggle('cr-off', !S.customRoundFlags[ri]);
+  row.querySelector('.cr-chk-btn').classList.toggle('on', S.customRoundFlags[ri]);
+  updateCustomNote();
+}
+
+function updateCustomNote() {
+  const selected = S.customRoundFlags.filter(Boolean).length;
+  const note = document.getElementById('custom-rounds-note');
+  if (note) note.textContent = selected === 0
+    ? 'Select at least 1 round to continue'
+    : `${selected} round${selected !== 1 ? 's' : ''} selected`;
+  const btn = document.getElementById('start-game-btn');
+  if (btn && S.gameMode === 'custom') {
+    const disabled = selected === 0;
+    btn.disabled = disabled;
+    btn.style.opacity = disabled ? '.45' : '';
+    btn.style.pointerEvents = disabled ? 'none' : '';
+  }
 }
 
 function updatePeakUI() {
   const p   = S.selectedPeak;
   const max = maxCards();
   document.getElementById('peak-num').textContent    = p;
-  document.getElementById('peak-rounds').textContent = p * 2;
+  document.getElementById('peak-rounds').textContent = p * 2 - 1;
   document.getElementById('peak-up').textContent     = `1 → ${p} cards`;
   document.getElementById('peak-down').textContent   = `${p} → 1 cards`;
   document.getElementById('peak-minus').classList.toggle('off', p <= 1);
@@ -1099,16 +1206,27 @@ function changePeak(d) {
   const next = S.selectedPeak + d;
   if (next < 1 || next > max) return;
   S.selectedPeak = next;
+  S.customRoundFlags = [];
   const el = document.getElementById('peak-num');
   el.style.transform = 'scale(1.3)';
   setTimeout(() => { el.style.transform = ''; }, 160);
   updatePeakUI();
+  if (S.gameMode === 'custom') renderCustomRounds();
 }
 
 function startGame() {
-  const p    = S.selectedPeak;
+  const p = S.selectedPeak;
   S.gamePeak = p;
-  S.rounds   = [...Array.from({length:p},(_,i)=>i+1), ...Array.from({length:p},(_,i)=>p-i)];
+  const allRounds = buildRounds(p);
+
+  if (S.gameMode === 'custom' && S.customRoundFlags.length === allRounds.length) {
+    S.rounds = allRounds.filter((_, ri) => S.customRoundFlags[ri]);
+  } else {
+    S.rounds = allRounds;
+  }
+
+  if (S.rounds.length === 0) return;
+
   S.roundData = S.rounds.map(() =>
     Array.from({length:S.numPlayers}, () => ({guess:null, tricks:null}))
   );
@@ -1401,25 +1519,26 @@ function dismissLickAndStick() {
 
 /* ── SCOREBOARD ────────────────────────────────────────────────── */
 function renderSB() {
-  const mc  = S.gamePeak;
-  const n   = S.numPlayers;
-  const rds = S.rounds;
-  const cur = S.currentRoundIndex;
+  const mc      = S.gamePeak;
+  const n       = S.numPlayers;
+  const rds     = S.rounds;
+  const cur     = S.currentRoundIndex;
+  const peakIdx = rds.indexOf(mc);
 
   // Header row
   let h = '<div class="sb-head-row">';
   h += '<div class="sb-name-th">PLAYERS</div>';
   for (let ri = 0; ri < rds.length; ri++) {
     const cards   = rds[ri];
-    const isPeak  = cards === mc;
+    const isPeak  = ri === peakIdx;
     const isCur   = ri === cur;
     const isBeyond = ri > cur;
-    const isFirst = ri < mc;
+    const isUp    = ri < peakIdx;
     const dName   = S.playerNames[dealerIdx(ri)];
     const cls = ['sb-col-th', isCur ? 'cur' : '', isPeak ? 'peak' : ''].filter(Boolean).join(' ');
     const numCls = isBeyond ? 'dim' : isPeak ? 'peak' : '';
     const dir = isPeak ? '' :
-      `<span class="${isFirst ? 'sb-dir-up' : 'sb-dir-dn'}">${isFirst ? '↑' : '↓'}</span>`;
+      `<span class="${isUp ? 'sb-dir-up' : 'sb-dir-dn'}">${isUp ? '↑' : '↓'}</span>`;
     h += `<div class="${cls}">
       ${dir}
       <span class="sb-cards ${numCls}">${cards}</span>
@@ -1573,6 +1692,8 @@ function resetGame() {
   S.currentRoundIndex = 0;
   S.currentBets = [];
   S.currentTricks = [];
+  S.gameMode = 'standard';
+  S.customRoundFlags = [];
   document.getElementById('resume-wrap').style.display = 'none';
   navigate('playerCount');
 }
