@@ -677,7 +677,7 @@ html,body{height:100%;width:100%;overflow:hidden;
 
     <div id="min-note" style="display:none">
       <div style="background:rgba(45,173,184,.1);border-radius:12px;padding:10px 14px;display:flex;gap:8px;align-items:center;font-size:.84rem;color:var(--teal);font-weight:600">
-        ℹ️ Minimum 3 players required
+        ℹ️ Minimum 2 players required
       </div>
     </div>
 
@@ -1032,14 +1032,14 @@ function updateCountUI() {
   document.getElementById('info-rounds').textContent = mc * 2 - 1;
   document.getElementById('info-up').textContent     = `1 → ${mc} cards`;
   document.getElementById('info-down').textContent   = `${mc} → 1 cards`;
-  document.getElementById('btn-minus').classList.toggle('off', n <= 3);
+  document.getElementById('btn-minus').classList.toggle('off', n <= 2);
   document.getElementById('btn-plus').classList.toggle('off', n >= 10);
-  document.getElementById('min-note').style.display = n === 3 ? 'block' : 'none';
+  document.getElementById('min-note').style.display = n === 2 ? 'block' : 'none';
 }
 
 function changeCount(d) {
   const n = S.numPlayers + d;
-  if (n < 3 || n > 10) return;
+  if (n < 2 || n > 10) return;
   S.numPlayers = n;
   const el = document.getElementById('count-num');
   el.style.transform = 'scale(1.3)';
