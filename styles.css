@@ -411,6 +411,21 @@ body {
   margin-bottom: 0.75rem;
 }
 
+.upcoming-card-meta {
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.upcoming-card-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
 .upcoming-card-desc {
   font-size: 0.9rem;
   color: var(--text-mid);
