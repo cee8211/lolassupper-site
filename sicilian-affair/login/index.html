@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#F6F2EB">
+  <title>A Sicilian Affair</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+  <style>
+
+    /* ══════════════════════════════════════════
+       RESET
+    ══════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ══════════════════════════════════════════
+       DESIGN TOKENS
+    ══════════════════════════════════════════ */
+    :root {
+      --bg:           #F6F2EB;
+      --surface:      #EEE9E0;
+      --card:         #FFFFFF;
+      --border:       rgba(0, 0, 0, 0.10);
+      --border-focus: rgba(0, 0, 0, 0.28);
+      --red:          #8B1A1A;
+      --red-hover:    #A01D1D;
+      --gold:         #7A5808;
+      --gold-dim:     rgba(122, 88, 8, 0.20);
+      --cream:        #1A1614;
+      --cream-dim:    #4A3E35;
+      --muted:        #8A7A6A;
+      --error:        #9B1A1A;
+    }
+
+    /* ══════════════════════════════════════════
+       BASE
+    ══════════════════════════════════════════ */
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--cream);
+      font-family: 'Lora', Georgia, serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ══════════════════════════════════════════
+       SHARED COMPONENTS
+    ══════════════════════════════════════════ */
+
+    /* Ornamental divider */
+    .ornament {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+    }
+    .ornament-line {
+      flex: 1;
+      height: 1px;
+    }
+    .ornament-line--l { background: linear-gradient(to right, transparent, var(--gold-dim)); }
+    .ornament-line--r { background: linear-gradient(to left, transparent, var(--gold-dim)); }
+    .ornament-gems {
+      color: var(--gold);
+      font-size: 0.45rem;
+      letter-spacing: 0.45em;
+      opacity: 0.55;
+      padding: 0 2px;
+    }
+
+    /* Section divider (labelled) */
+    .rule-divider {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+    }
+    .rule-divider-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .rule-divider-label {
+      font-size: 0.62rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    /* ══════════════════════════════════════════
+       WELCOME SCREEN
+    ══════════════════════════════════════════ */
+    .welcome {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 52px 22px 80px;
+      gap: 0;
+    }
+
+    .welcome-ornament {
+      max-width: 420px;
+      width: 100%;
+      margin-bottom: 34px;
+    }
+
+    .site-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(2.8rem, 11vw, 4.8rem);
+      font-weight: 400;
+      line-height: 1.08;
+      text-align: center;
+      color: var(--cream);
+      letter-spacing: 0.015em;
+      margin-bottom: 12px;
+    }
+
+    .tagline {
+      font-family: 'Lora', serif;
+      font-size: 0.95rem;
+      font-style: italic;
+      font-weight: 300;
+      color: var(--gold);
+      letter-spacing: 0.28em;
+      margin-bottom: 42px;
+    }
+
+    .story-card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 26px 22px;
+      margin-bottom: 34px;
+    }
+
+    .story-card p {
+      font-size: 1.05rem;
+      font-weight: 300;
+      line-height: 1.82;
+      color: var(--cream-dim);
+    }
+
+    .story-card p + p {
+      margin-top: 14px;
+    }
+
+    .welcome-divider {
+      max-width: 420px;
+      width: 100%;
+      margin-bottom: 30px;
+    }
+
+    .unlock-form {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.65rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .form-input {
+      display: block;
+      width: 100%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 14px 16px;
+      font-family: 'Lora', serif;
+      font-size: 1.15rem;
+      font-weight: 400;
+      color: var(--cream);
+      outline: none;
+      transition: border-color 0.2s;
+      margin-bottom: 10px;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .form-input:focus {
+      border-color: var(--border-focus);
+    }
+
+    .form-input::placeholder {
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .unlock-btn {
+      display: block;
+      width: 100%;
+      background: var(--red);
+      border: 1px solid rgba(110, 16, 16, 0.5);
+      border-radius: 2px;
+      padding: 15px 20px;
+      font-family: 'Lora', serif;
+      font-size: 1.05rem;
+      font-weight: 500;
+      letter-spacing: 0.09em;
+      color: #F6F2EB;
+      cursor: pointer;
+      transition: background 0.2s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .unlock-btn:hover:not(:disabled) {
+      background: var(--red-hover);
+    }
+
+    .unlock-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .form-error {
+      margin-top: 12px;
+      font-size: 0.95rem;
+      font-style: italic;
+      color: var(--error);
+    }
+
+    /* ══════════════════════════════════════════
+       CHARACTER SCREEN (Phase 2 placeholder)
+    ══════════════════════════════════════════ */
+    .char-screen {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      gap: 14px;
+      text-align: center;
+    }
+
+    .char-ornament {
+      max-width: 280px;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .char-name {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 7vw, 2.6rem);
+      font-weight: 400;
+      color: var(--cream);
+    }
+
+    .char-role {
+      font-size: 1.05rem;
+      font-style: italic;
+      font-weight: 300;
+      color: var(--gold);
+      max-width: 320px;
+      line-height: 1.5;
+    }
+
+    .char-status {
+      font-size: 0.62rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 14px;
+    }
+
+    .char-back-btn {
+      margin-top: 36px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 11px 22px;
+      font-family: 'Lora', serif;
+      font-size: 0.85rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .char-back-btn:hover {
+      border-color: var(--border-focus);
+      color: var(--cream-dim);
+    }
+
+    /* ══════════════════════════════════════════
+       ORCHESTRATOR SCREEN (Phase 3 placeholder)
+    ══════════════════════════════════════════ */
+    .orc-screen {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      gap: 14px;
+      text-align: center;
+    }
+
+    .orc-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 400;
+      color: var(--cream);
+    }
+
+    .orc-status {
+      font-size: 0.62rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    .orc-back-btn {
+      margin-top: 30px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 11px 22px;
+      font-family: 'Lora', serif;
+      font-size: 0.85rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .orc-back-btn:hover {
+      border-color: var(--border-focus);
+      color: var(--cream-dim);
+    }
+
+  </style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ──────────────────────────────────────────
+       WELCOME SCREEN
+  ────────────────────────────────────────── -->
+  <div v-if="screen === 'welcome'" class="welcome">
+
+    <div class="ornament welcome-ornament">
+      <div class="ornament-line ornament-line--l"></div>
+      <div class="ornament-gems">◆ ◆ ◆</div>
+      <div class="ornament-line ornament-line--r"></div>
+    </div>
+
+    <h1 class="site-title">A&nbsp;Sicilian<br>Affair</h1>
+    <p class="tagline">To&nbsp;die&nbsp;for.</p>
+
+    <div class="story-card">
+      <p>It's Christmas Eve, 1948. The Moretti family and their guests are gathering at the family's lodge in the mountains north of Boston, as they do every year — part celebration, part business, the kind of night where deals get made over cocktails and old debts get called in.</p>
+      <p>This year, Zia Donatella will hand down the family's most treasured heirloom, the Moretti Diamonds, to the eldest daughter, Eva, as tradition demands. Let's hope "The Fox" — the city's most notorious jewel thief — stays far away.</p>
+      <p>A fierce storm has rolled in, cutting the lodge off from the outside world. Which is unfortunate, because Chandler Jones, Nick Johnson's valet, has just been found dead in the kitchen. It looks like a heart attack — but is it murder?</p>
+    </div>
+
+    <div class="rule-divider welcome-divider">
+      <div class="rule-divider-line"></div>
+      <span class="rule-divider-label">Your character awaits</span>
+      <div class="rule-divider-line"></div>
+    </div>
+
+    <form class="unlock-form" @submit.prevent="unlock">
+      <label class="form-label" for="pw-input">Enter your password</label>
+      <input
+        id="pw-input"
+        v-model="password"
+        type="text"
+        class="form-input"
+        placeholder="Your secret password"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+      />
+      <button
+        type="submit"
+        class="unlock-btn"
+        :disabled="loading || !password.trim()"
+      >{{ loading ? 'One moment…' : 'Unlock my character' }}</button>
+      <p v-if="error" class="form-error">{{ error }}</p>
+    </form>
+
+  </div>
+
+
+  <!-- ──────────────────────────────────────────
+       CHARACTER SCREEN  (Phase 2)
+  ────────────────────────────────────────── -->
+  <div v-if="screen === 'character'" class="char-screen">
+    <div class="ornament char-ornament">
+      <div class="ornament-line ornament-line--l"></div>
+      <div class="ornament-gems">◆</div>
+      <div class="ornament-line ornament-line--r"></div>
+    </div>
+    <h2 class="char-name">{{ currentChar.name }}</h2>
+    <p v-if="currentChar.role" class="char-role">{{ currentChar.role }}</p>
+    <p class="char-status">Character details coming soon</p>
+    <button class="char-back-btn" @click="logout">← Leave the lodge</button>
+  </div>
+
+
+  <!-- ──────────────────────────────────────────
+       ORCHESTRATOR SCREEN  (Phase 3)
+  ────────────────────────────────────────── -->
+  <div v-if="screen === 'orchestrator'" class="orc-screen">
+    <div class="ornament char-ornament">
+      <div class="ornament-line ornament-line--l"></div>
+      <div class="ornament-gems">◆ ◆ ◆</div>
+      <div class="ornament-line ornament-line--r"></div>
+    </div>
+    <h2 class="orc-title">Consigliere</h2>
+    <p class="orc-status">Orchestrator dashboard coming soon</p>
+    <button class="orc-back-btn" @click="logout">← Sign out</button>
+  </div>
+
+</div><!-- #app -->
+
+
+<!-- Vue 3 (global build, no build step needed) -->
+<script src="https://unpkg.com/vue@3.4.0/dist/vue.global.prod.js"></script>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+//  PASSWORD MAP
+//
+//  Assign each guest's submitted password to their character.
+//  Passwords are matched case-insensitively with leading/trailing
+//  spaces stripped — so "Tiger", "tiger", and "Tiger " all match.
+//
+//  Character IDs used throughout the app:
+//    salvatore_moretti  maria_moretti      eva_moretti
+//    nick_johnson       guido_moretti*     carmen_moretti
+//    zia_donatella      jimmy_callas       charlie_callas
+//    dr_sal_bruno       reggie_vanni       christy_cardone*
+//    amelia_marchetti   dinah_peretti      enzo_rizzo*
+//    _orchestrator      (* = optional cast)
+//
+//  To add the Orchestrator, add an entry with id: '_orchestrator'.
+// ═══════════════════════════════════════════════════════════════════
+const PASSWORD_MAP = {
+
+  'w@sITme?!'    : { id: 'reggie_vanni',      name: 'Reggie Vanni',      role: 'Young socialite friend of Eva\'s.' },
+  'Koda6115'     : { id: 'dinah_peretti',     name: 'Dinah Peretti',     role: 'Kitchen help, brought in for the night.' },
+  'LilyScar'     : { id: 'eva_moretti',       name: 'Eva Moretti',       role: 'Salvatore and Maria\'s willful 21-year-old daughter.' },
+  'forzamilan'   : { id: 'guido_moretti',     name: 'Guido Moretti',     role: 'Salvatore and Maria\'s studious 20-year-old son.' },
+  'Padda1986!'   : { id: 'maria_moretti',     name: 'Maria Moretti',     role: 'Salvatore\'s much-loved wife.' },
+  'Carito11'     : { id: 'zia_donatella',     name: 'Zia Donatella',     role: 'Salvatore\'s elderly and often forgetful great-aunt.' },
+  'Tiger'        : { id: 'jimmy_callas',      name: 'Jimmy Callas',      role: 'Maria\'s brother. Art dealer and traveler — officially.' },
+  'Fartybarty'   : { id: 'christy_cardone',   name: 'Christy Cardone',   role: 'Friend of Guido\'s.' },
+  'Gabagool'     : { id: 'salvatore_moretti', name: 'Salvatore Moretti', role: '"Il Leone" — head of the family.' },
+  'Stevie1'      : { id: 'carmen_moretti',    name: 'Carmen Moretti',    role: 'Salvatore and Maria\'s mischievous 16-year-old daughter.' },
+  'Kevin1996!'   : { id: 'dr_sal_bruno',      name: 'Dr. Sal Bruno',     role: 'Family doctor and friend.' },
+  'Ali1996!'     : { id: 'enzo_rizzo',        name: 'Enzo Rizzo',        role: 'Butler / trusted family retainer.' },
+  'GoodFella'    : { id: 'nick_johnson',      name: 'Nick Johnson',      role: 'Unexpected guest, friend from Maria\'s youth.' },
+  'Janandbruce1!': { id: 'charlie_callas',    name: 'Charlie Callas',    role: 'Jimmy\'s son, currently a student at Harvard.' },
+  'TEMP'         : { id: 'amelia_marchetti',  name: 'Amelia Marchetti',  role: 'Donatella\'s oldest friend and allegedly famed detective.' },
+
+  // ── Orchestrator (Caroline) ──
+  'BENITO#'      : { id: '_orchestrator', name: 'Consigliere' },
+
+};
+// ═══════════════════════════════════════════════════════════════════
+
+
+const { createApp, ref, onMounted } = Vue;
+
+createApp({
+  setup() {
+    const screen      = ref('welcome');
+    const password    = ref('');
+    const loading     = ref(false);
+    const error       = ref('');
+    const currentChar = ref(null);
+
+    // Restore session across page refreshes
+    onMounted(() => {
+      const savedId = sessionStorage.getItem('sicilian_char_id');
+      if (savedId) {
+        if (savedId === '_orchestrator') { window.location.href = '../orchestrator/index.html'; return; }
+        const entry = Object.values(PASSWORD_MAP).find(c => c.id === savedId);
+        if (entry) { window.location.href = '../character/index.html'; return; }
+      }
+    });
+
+    function unlock() {
+      const input = password.value.trim();
+      if (!input) return;
+
+      loading.value = true;
+      error.value   = '';
+
+      const match = Object.entries(PASSWORD_MAP).find(
+        ([pw]) => pw.trim().toLowerCase() === input.toLowerCase()
+      );
+
+      if (match) {
+        const [, entry] = match;
+        sessionStorage.setItem('sicilian_char_id', entry.id);
+        if (entry.id === '_orchestrator') {
+          window.location.href = '../orchestrator/index.html';
+          return;
+        }
+        window.location.href = '../character/index.html';
+        return;
+      } else {
+        error.value = 'Password not recognised — check your spelling and try again.';
+      }
+
+      loading.value = false;
+    }
+
+    function logout() {
+      sessionStorage.removeItem('sicilian_char_id');
+      currentChar.value = null;
+      password.value    = '';
+      error.value       = '';
+      screen.value      = 'welcome';
+    }
+
+    return { screen, password, loading, error, currentChar, unlock, logout };
+  }
+}).mount('#app');
+</script>
+
+</body>
+</html>

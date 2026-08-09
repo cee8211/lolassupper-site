@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#F6F2EB">
+  <title>A Sicilian Affair</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+  <style>
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #F6F2EB;
+      --card:        #FFFFFF;
+      --border:      rgba(0,0,0,0.09);
+      --border-hi:   rgba(0,0,0,0.22);
+      --red:         #8B1A1A;
+      --red-hover:   #A01D1D;
+      --gold:        #7A5808;
+      --gold-bg:     rgba(122,88,8,0.06);
+      --gold-border: rgba(122,88,8,0.22);
+      --ink:         #1A1614;
+      --ink-dim:     #4A3E35;
+      --muted:       #8A7A6A;
+    }
+
+    html, body {
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Lora', Georgia, serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── TOP BAR ── */
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      background: rgba(246,242,235,0.96);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+    .top-bar-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .top-bar-name {
+      flex: 1;
+      min-width: 0;
+    }
+    .top-bar-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      font-weight: 400;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .top-bar-role {
+      font-size: 0.68rem;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .rules-btn {
+      flex-shrink: 0;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 7px 14px;
+      font-family: 'Lora', serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .rules-btn:hover { border-color: var(--border-hi); color: var(--ink-dim); }
+
+    /* ── PAGE ── */
+    .page {
+      padding: 20px 16px 80px;
+      max-width: 540px;
+      margin: 0 auto;
+    }
+
+    /* ── SECTION ── */
+    .section { margin-bottom: 28px; }
+    .section-title {
+      font-size: 0.6rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── OVERVIEW ── */
+    .summary-text {
+      font-size: 1.05rem;
+      font-style: italic;
+      line-height: 1.75;
+      color: var(--ink-dim);
+      margin-bottom: 12px;
+    }
+    .expand-btn {
+      background: transparent;
+      border: none;
+      padding: 0;
+      font-family: 'Lora', serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .expand-btn-arrow {
+      display: inline-block;
+      transition: transform 0.2s;
+      font-style: normal;
+    }
+    .expand-btn-arrow.open { transform: rotate(180deg); }
+
+    .bio-paras {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .bio-paras p {
+      font-size: 1rem;
+      line-height: 1.78;
+      color: var(--ink-dim);
+    }
+    .valet-block {
+      margin-top: 14px;
+      padding: 12px 14px;
+      background: rgba(139,26,26,0.04);
+      border: 1px solid rgba(139,26,26,0.16);
+      border-radius: 2px;
+    }
+    .valet-label {
+      font-size: 0.58rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 6px;
+    }
+    .valet-block p {
+      font-size: 0.95rem;
+      font-style: italic;
+      line-height: 1.68;
+      color: var(--ink-dim);
+    }
+
+    /* ── GOALS ── */
+    .goals-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .goals-list li {
+      font-size: 1rem;
+      line-height: 1.55;
+      color: var(--ink-dim);
+      padding-left: 18px;
+      position: relative;
+    }
+    .goals-list li::before {
+      content: '◆';
+      position: absolute;
+      left: 0;
+      font-size: 0.45rem;
+      top: 6px;
+      color: var(--gold);
+    }
+
+    /* ── FIRST MOVES ── */
+    .first-moves {
+      background: var(--gold-bg);
+      border: 1px solid var(--gold-border);
+      border-radius: 2px;
+      padding: 16px;
+    }
+    .first-moves-label {
+      font-size: 0.58rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+    .moves-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .moves-list li {
+      font-size: 0.97rem;
+      line-height: 1.55;
+      color: var(--ink-dim);
+      padding-left: 18px;
+      position: relative;
+    }
+    .moves-list li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--gold);
+    }
+
+    /* ── SPECIAL RULES (Carmen) ── */
+    .special-block {
+      padding: 12px 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      font-size: 0.92rem;
+      line-height: 1.65;
+      color: var(--ink-dim);
+      font-style: italic;
+    }
+
+    /* ── OTHER PEOPLE ── */
+    .people-list { display: flex; flex-direction: column; gap: 10px; }
+    .person-card {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 12px;
+    }
+    .person-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .person-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 3px;
+    }
+    .person-note {
+      font-size: 0.92rem;
+      line-height: 1.55;
+      color: var(--ink-dim);
+    }
+
+    /* ── ABILITIES ── */
+    .abilities-list { display: flex; flex-direction: column; gap: 12px; }
+    .ability-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 14px;
+    }
+    .ability-name {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 5px;
+    }
+    .ability-desc {
+      font-size: 0.93rem;
+      line-height: 1.55;
+      color: var(--ink-dim);
+      margin-bottom: 12px;
+    }
+    .ability-circles {
+      display: flex;
+      gap: 9px;
+      flex-wrap: wrap;
+    }
+    .use-circle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--border-hi);
+      background: transparent;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .use-circle:hover { border-color: var(--gold); }
+    .use-circle.filled { background: var(--ink); border-color: var(--ink); }
+    .use-circle.filled::after {
+      content: '✕';
+      font-size: 0.55rem;
+      color: #fff;
+      font-weight: 700;
+    }
+    .per-player-counter {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .counter-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--border-hi);
+      background: transparent;
+      color: var(--ink-dim);
+      font-size: 1.1rem;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .counter-val {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      color: var(--ink);
+      min-width: 28px;
+      text-align: center;
+    }
+    .counter-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* ── SECRET & CLUE ── */
+    .sc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 380px) { .sc-grid { grid-template-columns: 1fr; } }
+    .sc-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 14px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+      min-height: 110px;
+      display: flex;
+      flex-direction: column;
+    }
+    .sc-card:hover { border-color: var(--border-hi); }
+    .sc-card--secret { border-color: rgba(139,26,26,0.22); }
+    .sc-card--clue   { border-color: var(--gold-border); }
+    .sc-label {
+      font-size: 0.58rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      flex-shrink: 0;
+    }
+    .sc-card--secret .sc-label { color: var(--red); }
+    .sc-card--clue   .sc-label { color: var(--gold); }
+    .sc-text {
+      font-size: 0.92rem;
+      line-height: 1.6;
+      color: var(--ink-dim);
+      flex: 1;
+      transition: filter 0.25s;
+    }
+    .sc-text--blur { filter: blur(6px); user-select: none; pointer-events: none; }
+    .sc-hint {
+      margin-top: 10px;
+      font-size: 0.6rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    /* ── RULES SHEET ── */
+    .rules-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(26,22,20,0.4);
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .rules-backdrop.open { opacity: 1; pointer-events: all; }
+    .rules-sheet {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 101;
+      background: var(--card);
+      border-radius: 12px 12px 0 0;
+      border-top: 1px solid var(--border);
+      padding: 0 20px calc(env(safe-area-inset-bottom) + 24px);
+      max-height: 82vh;
+      overflow-y: auto;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.32,0.72,0,1);
+      -webkit-overflow-scrolling: touch;
+    }
+    .rules-sheet.open { transform: translateY(0); }
+    .rules-sheet::-webkit-scrollbar { display: none; }
+    .rules-handle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 0 12px;
+      position: sticky;
+      top: 0;
+      background: var(--card);
+    }
+    .rules-handle {
+      width: 36px;
+      height: 4px;
+      background: var(--border-hi);
+      border-radius: 2px;
+      margin: 0 auto;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 10px;
+    }
+    .rules-close {
+      background: transparent;
+      border: none;
+      font-size: 1.3rem;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 4px;
+      margin-left: auto;
+      line-height: 1;
+    }
+    .rules-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: 18px;
+    }
+    .rules-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .rule-item { display: flex; gap: 12px; }
+    .rule-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 0.8rem;
+      color: var(--gold);
+      font-weight: 700;
+      flex-shrink: 0;
+      padding-top: 2px;
+      min-width: 18px;
+    }
+    .rule-text {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--ink-dim);
+    }
+    .rule-text strong { color: var(--ink); font-weight: 600; }
+
+    /* ── LOGOUT ── */
+    .logout-row {
+      text-align: center;
+      padding-top: 8px;
+    }
+    .logout-btn {
+      background: transparent;
+      border: none;
+      font-family: 'Lora', serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 8px 16px;
+    }
+
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <template v-if="char">
+
+    <!-- ── TOP BAR ── -->
+    <div class="top-bar">
+      <button class="rules-btn" @click="logout">←</button>
+      <div class="top-bar-avatar" :style="{ background: char.color }">{{ char.initials }}</div>
+      <div class="top-bar-name">
+        <div class="top-bar-title">{{ char.name }}</div>
+        <div class="top-bar-role">{{ char.role }}</div>
+      </div>
+      <button class="rules-btn" @click="rulesOpen = true">Rules</button>
+    </div>
+
+    <!-- ── PAGE CONTENT ── -->
+    <div class="page">
+
+      <!-- OVERVIEW -->
+      <div class="section">
+        <div class="section-title">Your character</div>
+
+        <p class="summary-text">{{ char.summary }}</p>
+
+        <button class="expand-btn" @click="bioOpen = !bioOpen">
+          {{ bioOpen ? 'Show less' : 'Read full background' }}
+          <span class="expand-btn-arrow" :class="{ open: bioOpen }">▾</span>
+        </button>
+
+        <div v-if="bioOpen" class="bio-paras">
+          <p v-for="(para, i) in char.bio" :key="i">{{ para }}</p>
+          <div v-if="char.valet" class="valet-block">
+            <div class="valet-label">How you feel about the valet's death</div>
+            <p>{{ char.valet }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SPECIAL RULES -->
+      <div class="section" v-if="char.special">
+        <div class="section-title">Special rules</div>
+        <div class="special-block">{{ char.special }}</div>
+      </div>
+
+      <!-- GOALS -->
+      <div class="section">
+        <div class="section-title">Your goals</div>
+        <ul class="goals-list">
+          <li v-for="(g, i) in char.goals" :key="i">{{ g }}</li>
+        </ul>
+      </div>
+
+      <!-- FIRST MOVES -->
+      <div class="section">
+        <div class="first-moves">
+          <div class="first-moves-label">Suggested first moves</div>
+          <ul class="moves-list">
+            <li v-for="(m, i) in char.firstMoves" :key="i">{{ m }}</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- OTHER PEOPLE -->
+      <div class="section">
+        <div class="section-title">Other people</div>
+        <div class="people-list">
+          <div class="person-card" v-for="(p, i) in char.otherPeople" :key="i">
+            <div class="person-avatar" :style="{ background: colorFor(p.name) }">
+              {{ initialsFor(p.name) }}
+            </div>
+            <div>
+              <div class="person-name">{{ p.name }}</div>
+              <div class="person-note">{{ p.note }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ABILITIES -->
+      <div class="section">
+        <div class="section-title">Abilities</div>
+        <div class="abilities-list">
+          <div class="ability-card" v-for="(ab, ai) in char.abilities" :key="ai">
+            <div class="ability-name">{{ ab.name }}</div>
+            <div class="ability-desc">{{ ab.desc }}</div>
+            <div v-if="ab.perPlayer" class="per-player-counter">
+              <button class="counter-btn" @click="dec(ai)">−</button>
+              <div>
+                <div class="counter-val">{{ uses[ai] }}</div>
+                <div class="counter-label">players used on</div>
+              </div>
+              <button class="counter-btn" @click="inc(ai)">+</button>
+            </div>
+            <div v-else class="ability-circles">
+              <button
+                v-for="n in ab.uses" :key="n"
+                :class="['use-circle', n <= uses[ai] ? 'filled' : '']"
+                @click="toggle(ai, n)"
+              ></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECRET & CLUE -->
+      <div class="section">
+        <div class="section-title">Secret &amp; Clue</div>
+        <div class="sc-grid">
+          <div class="sc-card sc-card--secret" @click="revSecret = !revSecret">
+            <div class="sc-label">Secret</div>
+            <div class="sc-text" :class="{ 'sc-text--blur': !revSecret }">{{ char.secret }}</div>
+            <div v-if="!revSecret" class="sc-hint">Tap to reveal</div>
+          </div>
+          <div class="sc-card sc-card--clue" @click="revClue = !revClue">
+            <div class="sc-label">Clue</div>
+            <div class="sc-text" :class="{ 'sc-text--blur': !revClue }">{{ char.clue }}</div>
+            <div v-if="!revClue" class="sc-hint">Tap to reveal</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOGOUT -->
+      <div class="logout-row">
+        <button class="logout-btn" @click="logout">← Leave the lodge</button>
+      </div>
+
+    </div><!-- .page -->
+
+    <!-- ── RULES SHEET ── -->
+    <div class="rules-backdrop" :class="{ open: rulesOpen }" @click="rulesOpen = false"></div>
+    <div class="rules-sheet" :class="{ open: rulesOpen }">
+      <div class="rules-handle-row">
+        <div class="rules-handle"></div>
+        <button class="rules-close" @click="rulesOpen = false">×</button>
+      </div>
+      <div class="rules-title">Rules for Dazzled to Death</div>
+      <ul class="rules-list">
+        <li class="rule-item">
+          <span class="rule-num">1</span>
+          <span class="rule-text"><strong>The Consigliere's word is law.</strong> The Consigliere is impartial. If you have a problem or want to do something unusual, see the Consigliere. Their power is absolute — and cannot be affected by abilities.</span>
+        </li>
+        <li class="rule-item">
+          <span class="rule-num">2</span>
+          <span class="rule-text"><strong>Winning and losing.</strong> You can achieve most of your goals simply by talking to people. The Consigliere will announce when the game is over. If you haven't succeeded by then — you're too late. Not everyone here wants you to succeed.</span>
+        </li>
+        <li class="rule-item">
+          <span class="rule-num">3</span>
+          <span class="rule-text"><strong>Doing stuff.</strong> Ordinary actions are resolved by simply carrying them out. To try something unusual, see the Consigliere, who will tell you the outcome. Use your imagination — this is a flexible game.</span>
+        </li>
+        <li class="rule-item">
+          <span class="rule-num">4</span>
+          <span class="rule-text"><strong>Politeness and fighting.</strong> We expect civilized behavior at this gathering. Any fisticuffs or tussling is entirely outside the spirit of the evening.</span>
+        </li>
+        <li class="rule-item">
+          <span class="rule-num">5</span>
+          <span class="rule-text"><strong>Leaving the lodge.</strong> The lodge is currently surrounded by a raging storm. You are advised not to attempt to leave.</span>
+        </li>
+        <li class="rule-item">
+          <span class="rule-num">6</span>
+          <span class="rule-text"><strong>Item cards.</strong> Items of importance are represented as item cards — only items detailed on cards can affect the game. If you don't have the card, you don't have the item.</span>
+        </li>
+        <li class="rule-item">
+          <span class="rule-num">7</span>
+          <span class="rule-text"><strong>Time.</strong> Dazzled to Death is played over about three hours, with extra time for reading your character. There will be breaks for food and drink. The Consigliere will announce when each period starts and finishes.</span>
+        </li>
+        <li class="rule-item">
+          <span class="rule-num">8</span>
+          <span class="rule-text"><strong>Dying.</strong> Your character may not survive the night. If you are shot, stabbed, or poisoned and don't receive medical help within ten minutes, you are dead — tell the Consigliere. However, nobody can die until Zia Donatella's announcement. Until then, you are safe. After that? That's up to you…</span>
+        </li>
+      </ul>
+    </div>
+
+  </template>
+
+</div><!-- #app -->
+
+<script src="https://unpkg.com/vue@3.4.0/dist/vue.global.prod.js"></script>
+<script>
+
+const CHARACTERS = [
+  {
+    id: 'salvatore_moretti',
+    name: 'Salvatore Moretti',
+    alias: '"Il Leone"',
+    role: 'Head of the family',
+    initials: 'SM',
+    color: '#7B1111',
+    summary: 'Head of the Moretti family — and quietly running out of road. The laundromats are cover for the real business, and someone from Providence wants what\'s owed.',
+    bio: [
+      'You are Salvatore Moretti — Il Leone to your face, and Don Moretti behind closed doors — head of the Moretti family in every sense: the one who built it, the one who protects it, the one everyone answers to. You are shrewd and deeply devoted to your family. You\'ve been happily married to Maria for 22 years, and you have a son and two daughters.',
+      'You always look forward to the family\'s Christmas Eve gathering — a rare night to have everyone under one roof. You have a mask you intend to wear tonight, as family tradition demands. This year, though, there are shadows over the evening.',
+      'To the world, the family\'s money comes from a chain of laundromats — and that much is even true, as far as it goes. What the ledgers don\'t show is what really runs through those machines. You\'ve already committed to buying out the remaining locations on the block — which will cost $1,000,000 to finish — and which needs to get finished, because the laundromats aren\'t just a business. They\'re the plumbing.',
+      'The trouble is, someone\'s noticed. A crew out of Providence has been leaning on your collectors and chipping away at territory that\'s been yours for twenty years, and you owe an old debt to men who don\'t forget and don\'t wait. If this doesn\'t turn around, the family could face ruin — or worse — within months. You\'ve confided in Jimmy, your brother-in-law, and your son Guido. You need new financing — or a partner — fast.',
+      'Maria\'s behavior is troubling you. You asked her for a loan, explaining you had a temporary cash flow problem, but she claims her money is already spent. She\'s seemed preoccupied lately, a little unwell, nervous and jumpy. And an \'old friend\' of hers, a man calling himself Nick Johnson, whom you\'d never heard of before, turned up right before the party.',
+      'Your daughter Eva turned 21 this year, and by family tradition, your great-aunt Donatella must hand over the Moretti Diamonds tonight. You\'d like to see them before they\'re passed to your daughter. A fake set was made years ago, but you don\'t know if it\'s still around.',
+    ],
+    valet: 'Dinah came to tell you about the body. When you inspected it, you saw an empty wine glass clutched in one hand — a strange smell rose from the glass, and an odd sediment sat at the bottom. You asked Dr. Bruno and your nephew Charlie, a medical student, to look into it. They say they\'ll have results within the hour. You dread what they\'ll find; you suspect he was poisoned.',
+    goals: [
+      'Business: Find a way out of your money troubles before the wrong people run out of patience. You need financing or a partner, soon.',
+      'Your wife: What\'s bothering Maria? Is she having an affair with Nick? Why would she refuse to lend you money?',
+      'Find out more about Nick: You\'re suspicious of him — dig deeper.',
+      'The Moretti Diamonds: You\'d like to see them. Does Zia Donatella still have the fakes?',
+    ],
+    firstMoves: [
+      'Ask Dr. Bruno and Charlie to let you know as soon as they have results on the wine glass.',
+      'Take Guido aside tonight and finish the conversation properly — make sure he understands exactly what\'s at stake.',
+    ],
+    otherPeople: [
+      { name: 'Maria', note: 'You\'ve had a long, happy marriage, but you wonder if something\'s changed. First she refused you a small loan, and now she seems tangled up with Nick, an \'old friend\' you\'ve never heard of.' },
+      { name: 'Jimmy Callas', note: 'Your wife\'s brother. He travels a lot and deals in arts and antiquities — or so he says; he\'s always been vague about the details. Still, you trust him, and you\'ve confided your real business worries in him.' },
+      { name: 'Guido', note: 'You\'ve brought your son into your confidence — the real confidence. Only 20, but he\'s got a good head on his shoulders.' },
+      { name: 'Eva', note: 'Your elder daughter is 21 and sulking because you wouldn\'t fund her clothing line. If she gets the diamonds, you may have to persuade her to sell them to keep the family afloat.' },
+      { name: 'Carmen', note: 'At 16, your youngest. You love her dearly, but she\'s boisterous and a handful. Her wretched pet monkey is always making a nuisance of itself.' },
+      { name: 'Zia Donatella', note: 'You\'re immensely fond of your father\'s elder sister, even though she doesn\'t seem quite herself these days.' },
+      { name: 'Nick Johnson', note: 'Allegedly an old friend of your wife\'s — but she\'s never once mentioned him before.' },
+    ],
+    abilities: [
+      { name: 'Astute judge of character', desc: 'Another player must reveal their Secret to you.', uses: 3 },
+      { name: 'Sudden insight', desc: 'After talking to another player, you realize they\'ve revealed more than they intended. They must show you their Clue.', uses: 3 },
+      { name: 'Not so fast!', desc: 'An ability played by another player has no effect — but they must still check off a circle. Cannot be used to cancel another Not so fast!. May be used if you are being pickpocketed.', uses: 2 },
+    ],
+    secret: 'You\'ve been doing badly in business. If this doesn\'t turn around within a couple of months, the family will be bankrupt.',
+    clue: 'The wine glass found next to the dead valet had a strange sediment in it.',
+  },
+  {
+    id: 'maria_moretti',
+    name: 'Maria Moretti',
+    alias: 'Donna Maria',
+    role: 'Wife of Salvatore',
+    initials: 'MM',
+    color: '#8B3A3A',
+    summary: 'Salvatore\'s devoted wife — holding a secret that could destroy everything she loves. An old enemy has reappeared, and he wants money.',
+    bio: [
+      'You are Maria Moretti, born into a respectable, comfortably-off Greek-American family. Your parents were killed in a tragic accident when you were 15 years old, and your older brother Jimmy looked after you and took you with him on his travels.',
+      'In Boston, you met Salvatore Moretti. Salvatore fell in love with you and eventually asked you to marry him. Although you were unsure at first, you realized what a good man he was and agreed to the marriage. Over the years, respect and fondness gave way to love, and you have never regretted your marriage. However, before meeting Salvatore, you were seduced by the rakish Niko Kontos in New York while Jimmy was away on business.',
+      'Niko reappeared two weeks before your wedding to Salvatore, saying he loved you and promising to marry you. Ready to call off your wedding, you were naively tricked into a night of passion. The next day Niko laughed in your face.',
+      'You went ahead and married Salvatore. On returning from your honeymoon, you learned you were pregnant. You have never been sure if Eva is Salvatore\'s or Niko\'s daughter. You have never confided in Salvatore.',
+      'To your horror, after all these years, Niko contacted you a few months ago and is threatening to reveal that Eva may be his child. You have already sent him $10,000, but now he has turned up here under a new name — Nick Johnson. You are frantic.',
+      'Salvatore asked you for a loan this week too. It broke your heart to say no. You didn\'t tell him you needed it for Niko\'s blackmail. Your whole happy life seems under threat.',
+      'Another worry is that your beloved nephew Charlie is in trouble yet again; it looks like he has been thrown out of Harvard for good this time. He says he has a $10,000 gambling debt and asked for help. As you may need every penny for Niko\'s blackmail, you were a bit sharp with him and said you can\'t help.',
+    ],
+    valet: 'That poor man! At the back of your mind, you are uneasy that it is Nick\'s valet — you do hope it was a natural death.',
+    goals: [
+      'Stop Niko\'s blackmail: Find a way of keeping Niko quiet for good — nobody must discover that he may be Eva\'s father.',
+      'Help your husband: Support Salvatore however you can — if you can solve the problem with Niko, you can help him financially.',
+      'Support your family: You love your family and would do anything for them.',
+      'Help your nephew: Help Charlie keep his secret about being expelled from Harvard. Help him get the $10,000 he needs to pay off his gambling debts.',
+    ],
+    firstMoves: [
+      'Ask Dr. Bruno about the valet\'s death: you want reassurance that it was natural causes.',
+      'Appeal to Niko to leave you alone.',
+    ],
+    otherPeople: [
+      { name: 'Salvatore', note: 'Your husband means the world to you, and you are devastated to think your happiness together is under threat.' },
+      { name: 'Dr. Bruno', note: 'Now retired, Dr. Bruno was your family\'s doctor and is a trusted family friend. The doctor\'s niece was seduced and ruined by Niko.' },
+      { name: 'Jimmy Callas', note: 'Your beloved brother is an arts and antiques dealer who travels a lot. Did Jimmy hear anything about you and Niko? You\'re not sure.' },
+      { name: 'Charlie Callas', note: 'Your beloved nephew is in trouble yet again; this is the first time you haven\'t bailed him out of trouble. His father, Jimmy, must not learn that Charlie has been expelled from Harvard.' },
+      { name: 'Reggie Vanni', note: 'A sweet friend of Eva\'s who has no family. You try to make Reggie feel welcome.' },
+      { name: 'Guido', note: 'Your son is solid and dependable, a chip off the old block.' },
+      { name: 'Eva', note: 'You love your eldest daughter, but she is spoilt: Salvatore denies her nothing.' },
+      { name: 'Carmen', note: 'Your younger daughter is boisterous and mischievous, but lovable. Her pet monkey is an awful nuisance.' },
+      { name: 'Amelia Marchetti', note: 'Zia Donatella\'s old friend, they go back a long way. Allegedly Amelia is a famed detective back home.' },
+      { name: 'Dinah Peretti', note: 'Thank goodness you found another cook after your old faithful one had to rush off to a family member\'s sickbed. She seems capable.' },
+    ],
+    abilities: [
+      { name: 'Flattery', desc: 'If you flatter another player, they must read to you the first goal listed on their character sheet.', uses: 3 },
+      { name: 'Let\'s share what we know', desc: 'After talking to another player, show them your Clue. They must then show you their Clue.', uses: 3 },
+      { name: 'Thorough appraisal', desc: 'Your privileged background lets you quickly tell whether someone has property. After speaking to another player, they must show you all their item cards. (You can\'t take their items — just look at them.)', uses: 3 },
+    ],
+    secret: 'You were seduced by Niko Kontos — now going by the name Nick Johnson — prior to marrying Salvatore, and he may be Eva\'s father.',
+    clue: 'Your cook, Lucia Bellini, was called away because of sudden illness in the family. Dinah Peretti is a temporary replacement.',
+  },
+  {
+    id: 'eva_moretti',
+    name: 'Eva Moretti',
+    alias: null,
+    role: 'Eldest daughter, age 21',
+    initials: 'EM',
+    color: '#A0522D',
+    summary: 'The eldest Moretti daughter — and tonight the family diamonds pass to her. She has plans for them that nobody knows about yet.',
+    bio: [
+      'You are Eva Moretti, the eldest daughter of Salvatore and Maria, and life so far has been one big round of fun for you. Tonight should be exciting too, as according to family tradition, Zia Donatella should hand over the Moretti Diamonds to you.',
+      'You have an artistic flair and an eye for design and clothes. There has been no doubt in your mind that your doting father and mother would bankroll you in starting your own design company.',
+      'However, much to your surprise, your father was not forthcoming when you tried to discuss it with him earlier this month. Instead, he asked you to wait until after tonight. Well, if they won\'t help, maybe you should break with boring old tradition and just jolly well sell the diamonds once you get your hands on them!',
+      'Or maybe you should ask your mother for the money? However, Maria seems to spend a lot of time talking to Nick Johnson, who you\'ve never seen before. Nick also makes you very uneasy — there is something not right there.',
+      'Other things are bothering you. Last night you wandered down late, probably around 2 am, to the drawing room to collect an evening bag you\'d left behind. To your surprise, you think you saw Uncle Jimmy, wearing a mask, peering at the old painting in the corner of the room. You think he then swapped the painting for another identical one! Something made you think you should creep away rather than challenge him.',
+      'You are glad you could invite your friend Reggie for the holidays. You told Reggie about Uncle Jimmy\'s strange behavior.',
+    ],
+    valet: 'It\'s tragic and a surprise, but you have thought no more about it. Heart attacks happen.',
+    goals: [
+      'Clothes design business: Find out why your father doesn\'t seem very keen on your new business. Persuade either your mother or your father to support you in setting up your own design company.',
+      'Uncle Jimmy: What was he doing swapping over those pictures in the drawing room? Have a look at the picture and see if you can work out what the joke is.',
+      'Nick Johnson: Find out more about Nick and what is going on between him and your mother.',
+      'Help Reggie fit in: Your family can be strange and intimidating, so help Reggie fit in with them.',
+    ],
+    firstMoves: [
+      'Talk to your mother, Maria, about your ideas for the clothes design business — ask if she will fund you.',
+      'Ask Charlie how his studies are going.',
+    ],
+    otherPeople: [
+      { name: 'Salvatore', note: 'Your father dotes on you and normally gives you anything you ask for, so you are peeved about his reaction to your business idea.' },
+      { name: 'Maria', note: 'Your mother seems very preoccupied and not her usual warm and happy self.' },
+      { name: 'Nick Johnson', note: 'This \'old friend\' of your mother\'s who has appeared from nowhere gives you the creeps.' },
+      { name: 'Zia Donatella', note: 'According to tradition, Zia Donatella will hand over the diamonds to you this evening.' },
+      { name: 'Amelia Marchetti', note: 'Zia Donatella\'s old friend. She\'s a nosy old lady, but she and Donatella have been friends forever.' },
+      { name: 'Carmen', note: 'Your sister is a pain. She\'d better keep that wretched monkey away from you tonight.' },
+      { name: 'Guido', note: 'Your younger brother acts like he\'s 50 and should be running the business with your father. He needs to lighten up a little.' },
+      { name: 'Reggie', note: 'Thank goodness you invited Reggie for the holidays. You hope you haven\'t spooked Reggie by describing Uncle Jimmy\'s strange behavior.' },
+      { name: 'Charlie', note: 'Your cousin just gets more and more handsome. You must ask him how his studies at Harvard are going.' },
+      { name: 'Dr. Bruno', note: 'The doctor looked after your family\'s health for years but is retired now. You saw Dr. Bruno putting powder in a glass of wine earlier today — he\'s probably got bad digestion, poor old thing.' },
+    ],
+    abilities: [
+      { name: 'Flattery', desc: 'If you flatter another player, they must read out to you the first goal listed on their character sheet.', uses: 3 },
+      { name: 'Sudden insight', desc: 'After talking to another player, you realize they\'ve revealed more than they intended. They must show you their Clue.', uses: 3 },
+      { name: 'Let\'s gossip', desc: 'Another player must first tell you who is listed in their Other People section, then read out the details of a character of your choice. You must then do the same for them.', uses: 3 },
+    ],
+    secret: 'You have no secrets. (If someone uses an ability to make you reveal this, they do not have to check off a use of it.)',
+    clue: 'Last night, you saw Uncle Jimmy swap the picture of Maria Garzoni\'s Still Life with Lemons and Blossoms for what looked like an identical replica.',
+  },
+  {
+    id: 'nick_johnson',
+    name: 'Nick Johnson',
+    alias: 'Real name: Niko Kontos',
+    role: 'Unexpected guest',
+    initials: 'NJ',
+    color: '#3A3A3A',
+    summary: 'A charming stranger with a murky past and very specific plans for this evening. Not everything about Nick Johnson is what it seems.',
+    bio: [
+      'You are introducing yourself as Nick Johnson, an old schoolfriend of Maria Moretti\'s. That\'s a lie. Your real name is Niko Kontos, and you are a smooth-talking operator who makes a living preying on well-off women by learning their secrets and threatening ruin.',
+      'You seduced Maria in New York when she was a young woman but abandoned her when you realized her family wasn\'t as wealthy as you\'d believed. Her brother Jimmy took her to Boston, where she met Salvatore Moretti.',
+      'Within a few weeks, Salvatore had swept Maria off her feet. You returned to Maria two weeks before her wedding, saying that you loved her and promising to marry her. It worked, and you tricked her into a night of passion. The next day you laughed, and left again. Salvatore and Maria\'s daughter Eva was born 8.5 months later.',
+      'It occurred to you that Eva may be your daughter — a thought you saved and stored for a future need. That time is now! You\'ve come back into Maria\'s life intending to either make a sizeable amount for keeping this quiet, or cause misery by claiming Eva as your own. Maria has already given you $10,000; you intend to ask for a lot more.',
+      'By a strange coincidence, you\'ve also come into possession of a letter suggesting that Zia Donatella had an illegitimate daughter. You tracked the daughter down: Dinah Peretti, a cook. You tricked the Morettis\' usual cook into leaving with a fake telegram, and persuaded Dinah to take the temporary position.',
+      'You\'ve sent Donatella an anonymous note saying, \'I know what you gave away!\' However, Dinah isn\'t cooperating; she\'s angry with you about the note.',
+    ],
+    valet: 'This is damned inconvenient. Jones hadn\'t been working for you long, and he didn\'t know anything about your underhand activities. Jones brought you a glass of wine to your room after lunch, but you said you didn\'t want it and made him take it away. You want to find out more about his death.',
+    goals: [
+      'Blackmail Maria: Make as much money as you can — she\'s given you $10,000 already, but she should be good for at least another $40,000.',
+      'The Moretti Diamonds: Try to guarantee yourself a share of the fortune from the diamonds by persuading Dinah to go along with your schemes.',
+      'Investigate your valet\'s death: Discover if foul play was behind it. If so, were you the real target?',
+      'Avoid Salvatore: He seems suspicious of you. Keep out of his way.',
+      'Be careful: There are several people here who have reason to hate you.',
+    ],
+    firstMoves: [
+      'Make sure Dinah Peretti is still going along with your plans for her to be recognized as Donatella\'s daughter.',
+      'Keep the pressure on Maria, hint at further blackmail, and try to work out how much she may pay you.',
+    ],
+    otherPeople: [
+      { name: 'Maria', note: 'You seduced her when she was young and naïve. You intend to blackmail her for every penny you can get.' },
+      { name: 'Eva', note: 'She may be your daughter, but that makes no difference to your twisted heart.' },
+      { name: 'Jimmy Callas', note: 'You hadn\'t met Jimmy before. Be cautious around him, though: it takes one to know one, and you can tell there\'s more to Jimmy than he\'s letting on.' },
+      { name: 'Salvatore', note: 'Maria\'s husband seems very suspicious of you, so avoid him as much as possible.' },
+      { name: 'Zia Donatella', note: 'You have a letter that proves Donatella is Dinah\'s mother.' },
+      { name: 'Amelia Marchetti', note: 'An elderly friend of Donatella\'s. You feel she\'s been watching you closely. Does she know something about you?' },
+      { name: 'Dinah Peretti', note: 'You have a letter that proves Dinah is Donatella\'s daughter. However, she doesn\'t seem so keen on getting money out of the family as you are. She is very angry with you about the note you sent Donatella.' },
+      { name: 'Dr. Sal Bruno', note: 'Dr. Bruno gave you a look of pure hatred yesterday, but you don\'t know why. You remember once dallying with a girl named Lucy Bruno — maybe the doctor is a relation?' },
+    ],
+    abilities: [
+      { name: 'Sly charmer', desc: 'If you flatter a female player, they must read to you the first goal listed on their character sheet.', uses: 3 },
+      { name: 'Astute judge of character', desc: 'Another player must reveal their Secret to you.', uses: 3 },
+      { name: 'Not so fast!', desc: 'An ability played by another player has no effect — but they must still check off a circle. Cannot be used to cancel another Not so fast!. May be used if you are being pickpocketed.', uses: 2 },
+    ],
+    secret: 'Your real name is Niko Kontos, and you may be Eva\'s father.',
+    clue: 'A letter exists proving that Dinah Peretti is Zia Donatella\'s daughter.',
+  },
+  {
+    id: 'guido_moretti',
+    name: 'Guido Moretti',
+    alias: null,
+    role: 'Son of Salvatore and Maria, age 20',
+    initials: 'GM',
+    color: '#6B4F12',
+    summary: 'The steady, studious Moretti son — the one his father trusts with the truth. Tonight, he finally gets to hear all of it.',
+    bio: [
+      'You are Guido Moretti, Salvatore and Maria\'s only son. You are at Harvard, studying law and business. You are quiet and studious, and it galls you a little that everyone seems to translate that to mean dull.',
+      'You respect your parents and would love to follow in your father\'s footsteps. You\'re proud that he\'s taken you into his confidence — not just about the laundromats, but about what really keeps the family afloat, and what\'s chasing him for money he doesn\'t have. Tonight he\'s promised to finally tell you the rest of it.',
+      'You\'re also worried about your mother; she looks pale and anxious and isn\'t in her usual happy frame of mind. You\'ve seen her talking earnestly to Dr. Bruno and shedding a few tears.',
+      'Unexpected guests don\'t help. Nick Johnson is allegedly an old friend of your mother\'s. But that doesn\'t explain why Maria goes as white as a sheet every time she talks to him.',
+      'And that wretched pet monkey of your sister Carmen\'s is such a nuisance. It went racing past you in the corridor two nights ago, and you could have sworn it was clutching something bright and shiny.',
+      'To brighten the party up, you brought Christy Cardone with you. Christy studies law at Harvard with you but would have been at a loose end over the holidays. You asked Christy to bring their antique flintlock pistol, because you know Uncle Jimmy would be delighted to see it.',
+    ],
+    valet: 'This is the last thing your parents need. Of course, you feel sorry for the man having had a heart attack, but the sooner the storm breaks and the proper authorities can deal with it, the better.',
+    goals: [
+      'Support your father: Hear him out tonight, whatever it is he\'s finally ready to tell you, and help him with his money worries.',
+      'Your mother\'s health: Follow up on your concerns about Maria\'s health and discover what\'s going on with Nick Johnson.',
+      'Charlie: Find out what sort of trouble Charlie is in at Harvard. You\'d like to bring him down a peg or two.',
+      'Carmen: Make sure she keeps her monkey in check. Discover what it was carrying in the corridor the other night.',
+      'Christy: You invited Christy to the party — make sure your friend is okay and has everything they need.',
+    ],
+    firstMoves: [
+      'Find a quiet moment with your father — he\'s told you he\'s ready to finally tell you the rest of it tonight.',
+      'Ask Carmen what her monkey was carrying the other night.',
+    ],
+    otherPeople: [
+      { name: 'Salvatore', note: 'Your father has business worries and has confided in you — more than in anyone else, save Uncle Jimmy. Tonight, he says, he\'ll finally tell you everything.' },
+      { name: 'Maria', note: 'Your beloved mother. She seems ill, and you want to find out what\'s wrong.' },
+      { name: 'Nick Johnson', note: 'Your mother\'s friend. You haven\'t heard of him before, and you don\'t like him.' },
+      { name: 'Zia Donatella', note: 'Your father\'s elderly great-aunt. She owns the Moretti Diamonds and will probably give them to Eva tonight.' },
+      { name: 'Amelia Marchetti', note: 'Your great-aunt\'s elderly friend, allegedly something of a detective.' },
+      { name: 'Eva', note: 'Your sister. Bright, sophisticated, and spoilt.' },
+      { name: 'Carmen', note: 'Your younger sister. Always up to mischief and getting into scrapes. She must learn to keep that pet monkey under control.' },
+      { name: 'Jimmy Callas', note: 'Your uncle. A somewhat mysterious character who deals in art and antiquities and travels a lot.' },
+      { name: 'Reggie Vanni', note: 'A young friend of Eva\'s. Seems very pleasant, if shy.' },
+      { name: 'Christy Cardone', note: 'Christy studies law at Harvard with you. They\'ve brought their 1770s flintlock pistol (a family heirloom) to show Uncle Jimmy.' },
+    ],
+    abilities: [
+      { name: 'Astute judge of character', desc: 'Another player must reveal their Secret to you.', uses: 2 },
+      { name: 'Let\'s gossip', desc: 'Another player must first tell you who is listed in their Other People section, then read out the details of a character of your choice. You must then do the same for them.', uses: 3 },
+      { name: 'Let\'s share what we know', desc: 'After talking to another player, show them your Clue. They must then show you their Clue.', uses: 3 },
+    ],
+    secret: 'You have no secrets. (If someone uses an ability to make you reveal this, they do not have to check off a use of it.)',
+    clue: 'Your cousin Charlie is in trouble at Harvard.',
+  },
+  {
+    id: 'carmen_moretti',
+    name: 'Carmen Moretti',
+    alias: null,
+    role: 'Youngest daughter, age 16',
+    initials: 'CM',
+    color: '#C47C2B',
+    summary: 'The youngest Moretti — sixteen, mischievous, and sitting on a very big secret. Her monkey has been at it again.',
+    special: 'You have eight monkey cards. If you persuade another player to hold your monkey for at least 10 minutes, they can take (at random) one of the monkey cards. That player can\'t leave your monkey somewhere — they must hold it. You aren\'t allowed to use the monkey cards yourself. Note that your Innocent look ability cannot be used while you are holding your pet monkey.',
+    bio: [
+      'You are Carmen Moretti, the youngest daughter of Salvatore and Maria, which you find incredibly dull as you\'re never allowed to do anything exciting. However, you have a mischievous mind and enjoy playing practical jokes.',
+      'Your boring brother Guido acts as if he\'s 50; but you envy your older sister Eva, as she gets so much attention. You worship your cousin Charlie; he always has time for you.',
+      'After a trip abroad, Uncle Jimmy brought you a pet monkey. It has a habit of sneaking in and taking things, but it usually brings them back to you.',
+      'You\'re trying not to harass your mother too much, as she seems very upset. Last night you saw her with her friend Nick, and they looked angry — some friend! You don\'t like Nick much — maybe he is The Fox!',
+      'You\'re worried. Not only is your mother in a bad mood, but two nights ago your monkey brought you the Moretti Diamonds! You\'re desperate to put them back where they belong, but you don\'t know where Zia Donatella normally keeps them. You\'re terrified that all hell will break loose if she finds they\'re gone.',
+      'You\'re wearing the Moretti Diamonds around your neck, hidden by your shirt, until you decide what to do.',
+    ],
+    valet: 'Gosh — a dead body. It\'s horrible, but sort of thrilling too. You hope it doesn\'t upset your mother and father more than they already seem to be.',
+    goals: [
+      'The Fox: It would be thrilling if The Fox were here, and you caught them! Ask Amelia Marchetti or Cousin Charlie for tips on what to look out for.',
+      'Return the diamonds: Return the Moretti Diamonds to Zia Donatella without causing a storm or getting your monkey into trouble.',
+      'Suspicious guest: There\'s something you don\'t like about Nick. Try not to let him out of your sight.',
+      'Get people to monkey-sit: You want to sneak around detecting, but that\'s going to be impossible with the monkey around. Persuade as many people as possible to hold on to it for you.',
+    ],
+    firstMoves: [
+      'Talk to Amelia Marchetti about The Fox. What tips can she give you for catching a jewelry thief?',
+      'Ask Eva to hold your monkey for you for a while. If she refuses, try someone else.',
+    ],
+    otherPeople: [
+      { name: 'Charlie', note: 'You adore your cousin. Maybe he\'ll help you sort out a way to get the diamonds back to Zia Donatella.' },
+      { name: 'Uncle Jimmy', note: 'You find your uncle a bit scary; he always seems to know when you\'re up to something. But he did bring you back your pet monkey from one of his trips away.' },
+      { name: 'Zia Donatella', note: 'You are very fond of your great-aunt, but her mind does wander, and she still thinks you are ten years old. You couldn\'t rely on her not to make a fuss if you just gave her the diamonds back direct.' },
+      { name: 'Amelia Marchetti', note: 'Your great-aunt\'s elderly friend. She is a real detective! She will be a great help if The Fox is here tonight.' },
+      { name: 'Dinah Peretti', note: 'You like Dinah, who is standing in for your usual cook. You\'ve been chatting to her in the kitchen, and she has been spoiling you with treats.' },
+      { name: 'Reggie', note: 'A friend of Eva\'s. Eva said Reggie hasn\'t got any family, so you try to remember to be nice.' },
+      { name: 'Nick Johnson', note: 'You can\'t imagine why he could ever have been a friend of your mother\'s, as you think he\'s slimy!' },
+      { name: 'Enzo Rizzo', note: 'Enzo is usually on your side when you get into mischief, so may be an ally in sorting out your diamonds problem.' },
+    ],
+    abilities: [
+      { name: 'Innocent look', desc: 'You look so young that people tell you things. Another player must reveal their Secret to you. YOU CAN ONLY use this ability while someone else has your monkey.', uses: 4 },
+      { name: 'Monkey business', desc: 'Use your monkey to pickpocket another player. Tell the Consigliere what item you want your monkey to steal. If that player doesn\'t have it, the Consigliere will take something else at random.', uses: 3 },
+      { name: 'Let\'s share what we know', desc: 'After talking to another player, show them your Clue. They must then show you their Clue.', uses: 3 },
+    ],
+    secret: 'Your monkey brought you the Moretti Diamonds.',
+    clue: 'Uncle Jimmy gave you your monkey after coming back from a trip abroad.',
+  },
+  {
+    id: 'zia_donatella',
+    name: 'Zia Donatella',
+    alias: null,
+    role: 'Salvatore\'s great-aunt',
+    initials: 'ZD',
+    color: '#5C3D7A',
+    summary: 'The family\'s beloved great-aunt — custodian of the Moretti Diamonds, and unable to find them. Someone also knows something they shouldn\'t.',
+    bio: [
+      'You are Zia Donatella, and you are such a sweet old lady that everyone loves you, even though your memory is not quite what it should be nowadays and you keep forgetting people\'s names. You never married, you are kind and generous to everyone, and there is not a single blemish on your character.',
+      'Actually, that\'s not strictly true. When you were 19 years old, you met Rory Calhoun, an absolutely wonderful young man. He was a soldier, and you hoped to marry, but your strict father would not hear of it. You hoped to win him over and continued the relationship in secret.',
+      'Tragedy struck when Rory was killed in an army training exercise, and shortly afterward you discovered you were pregnant with his child. Your family hushed it all up. Your baby girl was born and was swiftly handed over for adoption. Outside the immediate family, only your dear friend, Amelia Marchetti, knew what had happened.',
+      'Then, just a few days ago, you received a horrible anonymous note which simply said, \'I know what you gave away.\' You are torn between fear of exposure and a desire to find out what may have happened to your baby.',
+      'Oh, those wretched diamonds! There are two versions of the Moretti Diamonds. One is the false copy that you are wearing now. But can you remember what you did with the real ones? No. You thought they were hidden in a false-backed copy of a novel on your shelf, but when you went to look earlier, the book was lying open and the diamonds had disappeared.',
+      'Thank goodness Amelia Marchetti is paying you a visit. You have shown her the note and told her about the diamonds. She is quite a detective. Hopefully she can help you sort all this out.',
+    ],
+    valet: 'Oh dear — this on top of everything else that\'s going on. You do feel sorry for the poor man, he seems a little young to have suffered a heart attack.',
+    goals: [
+      'The Moretti Diamonds: You must give the diamonds to Eva later this evening. Before that, however, you need to find out where you put the wretched real diamonds. Avoid letting it be known that you\'ve lost them.',
+      'Threatening note: Find out who has sent you this note and why. You want to know if this will lead to information about your daughter.',
+      'Masked figures: Find out what was going on last night! You are worried that you are getting a little senile in your old age.',
+    ],
+    firstMoves: [
+      'Ask Amelia Marchetti whether you should involve Jimmy Callas in the hunt for the missing diamonds.',
+      'Compliment Dinah Peretti on her delicious food. Have you met her before — why does she seem familiar?',
+    ],
+    otherPeople: [
+      { name: 'Amelia Marchetti', note: 'Your oldest and best friend, an amateur detective. You gave each other identical lockets inscribed with \'Forever Friends.\' Amelia knows about your illegitimate child, and you have told her about the horrible note and that you can\'t find the diamonds.' },
+      { name: 'Salvatore', note: 'Your great-nephew. He is very kind to you. He tried to ask you about the diamonds yesterday, but you got flustered and he changed the subject, which was a huge relief.' },
+      { name: 'Maria', note: 'Salvatore\'s charming wife — she always makes you very welcome.' },
+      { name: 'Eva', note: 'Not your favorite great-niece, but, by tradition, you should give her the diamonds tonight as she is now 21.' },
+      { name: 'Carmen', note: 'Your favorite great-niece, although you do wish she would donate that wretched pet monkey of hers to a zoo.' },
+      { name: 'Guido', note: 'Your great-nephew. A very dull, but well-meaning young man.' },
+      { name: 'Nick Johnson', note: 'Maria introduced him as an \'old friend\' of hers. You\'re not sure if you like him — a little too much charm, you think.' },
+      { name: 'Reggie Vanni', note: 'A nice young friend of Eva\'s.' },
+      { name: 'Dinah Peretti', note: 'The temporary cook. She has been producing some delightful food. There is something about her that seems oddly familiar.' },
+    ],
+    abilities: [
+      { name: 'Let\'s gossip', desc: 'Another player must first tell you who is listed in their Other People section, then read out the details of a character of your choice. You must then do the same for them.', uses: 3 },
+      { name: 'Tough constitution', desc: 'You are a wiry old bird and as sturdy as an ox, and can ignore the effects of one dose of poison.', uses: 3 },
+      { name: 'Not so fast!', desc: 'An ability played by another player has no effect — but they must still check off a circle. Cannot be used to cancel another Not so fast!. May be used if you are being pickpocketed.', uses: 2 },
+    ],
+    secret: 'You have mislaid or lost the \'real\' Moretti Diamonds. Also, you had a secret baby when you were young — it was given up for adoption.',
+    clue: 'You swapped silver lockets, inscribed \'Forever Friends,\' with Amelia Marchetti when you were young. Also, there are two versions of the Moretti Diamonds — one is a fake.',
+  },
+  {
+    id: 'jimmy_callas',
+    name: 'Jimmy Callas',
+    alias: null,
+    role: 'Maria\'s brother — art dealer, officially',
+    initials: 'JC',
+    color: '#2A4A2A',
+    summary: 'Maria\'s brother, art dealer and traveler — officially. In reality, you were very busy last night, and you\'ll be watching the painting closely all evening.',
+    bio: [
+      'You are Jimmy Callas, Maria\'s older brother and a widower — your dear wife, Vanessa, died some years ago, leaving you to bring up your only son, Charlie. You are an arts and artefacts dealer, which involves a lot of foreign travel.',
+      'You do, however, have a secret. Your arts and artefacts business is a front for your other activities as an undercover FBI agent who specializes in organized thefts of arts and artefacts. No one else in the family suspects this.',
+      'You have an uneasy relationship with your son, Charlie. He has inherited your adventurous streak, but you hope he will at least get a sound education before deciding what to do.',
+      'Your brother-in-law Salvatore has confided in you that he has some serious business and money worries. You\'ve known for years what the family business really is. Any other agent would call that probable cause. You call it Sunday dinner. You\'ve never reported it, and you\'re not about to start tonight. However, you can help him: you realized some time ago that the small painting in the drawing room might be a masterpiece called Still Life with Lemons and Blossoms by Maria Garzoni, worth $1 million.',
+      'However, you also learned that The Fox may know about the painting and may try to steal it. You have told no one else in the family of the value of the painting — you want to use it as bait to trap The Fox. Last night, at about 2 am, you went down to the drawing room in a mask and swapped the paintings over. The original is safe in your room.',
+      'You also ought to warn Christy Cardone, Guido\'s friend from Harvard, who has brought a valuable antique flintlock pistol to show you.',
+    ],
+    valet: 'You can\'t help feeling something odd is going on. Your crime-detecting instincts are buzzing. Get more details out of Salvatore if you can.',
+    goals: [
+      'The Fox: Find out if The Fox is at this gathering. If so, trap The Fox if they try to steal the painting or the diamonds.',
+      'Charlie: Find out what\'s going on with your son and make sure his academic studies are still going well.',
+      'The painting: Protect the painting and make sure it\'s handed to Salvatore before the end of the night.',
+      'Maria: You hate to see your sister unhappy. Discover what is upsetting her and help put it right if you can.',
+      'The flintlock pistol: Warn Christy to keep their flintlock pistol safe.',
+    ],
+    firstMoves: [
+      'Ask Maria why she is looking so unhappy and whether you can help.',
+      'Ask Charlie how his academic studies are going.',
+    ],
+    otherPeople: [
+      { name: 'Maria', note: 'Your sister seems out of sorts and tense. Is anything the matter?' },
+      { name: 'Salvatore', note: 'You admire Salvatore\'s steadiness and the way he puts his family first. You will tell him of the painting\'s value when you can, to calm his money worries.' },
+      { name: 'Nick Johnson', note: 'Nick has been introduced to you as an old friend of Maria\'s, although you\'ve never heard of him before.' },
+      { name: 'Dr. Sal Bruno', note: 'An old friend of the family.' },
+      { name: 'Eva', note: 'Your elder niece is lively and confident, but slightly spoilt.' },
+      { name: 'Guido', note: 'Your nephew is a sensible young man who will probably follow in his father\'s business footsteps.' },
+      { name: 'Carmen', note: 'Your younger niece is a mischievous youngster. The pet monkey you gave her causes all sorts of trouble.' },
+      { name: 'Zia Donatella', note: 'Salvatore\'s great-aunt. Her mind wanders somewhat nowadays. You should warn her that The Fox might try to steal her diamonds.' },
+      { name: 'Amelia Marchetti', note: 'Donatella\'s elderly friend. You gather she has quite a reputation for amateur detecting back home.' },
+      { name: 'Enzo Rizzo', note: 'Enzo is the only person who knows you are an FBI agent. A resourceful character whom you trust entirely.' },
+    ],
+    abilities: [
+      { name: 'You\'ve revealed more than you intended', desc: 'Another player has revealed more than they intended and must reveal their Secret to you.', uses: 2 },
+      { name: 'Let\'s share what we know', desc: 'After talking to another player, show them your Clue. They must then show you their Clue.', uses: 3 },
+      { name: 'Arrest', desc: 'You may arrest anyone under suspicion. The Consigliere will restrict their movement and prevent them from using their abilities. However, if you cannot present suitable evidence within 15 minutes (5 minutes if before the Moretti Diamonds announcement), they must be released.', uses: 2 },
+    ],
+    secret: 'You are an FBI agent. Last night you swapped the painting in the dining room for a fake.',
+    clue: 'You have heard that The Fox is interested in a painting in the house.',
+  },
+  {
+    id: 'charlie_callas',
+    name: 'Charlie Callas',
+    alias: null,
+    role: 'Jimmy\'s son — Harvard medical student',
+    initials: 'CC',
+    color: '#3A5A7A',
+    summary: 'Jimmy\'s son, supposedly thriving at Harvard. Actually: expelled, in debt, and desperately hoping nobody finds out.',
+    bio: [
+      'You are Charlie Callas, son of Jimmy Callas and the much-loved nephew of your doting Aunt Maria Moretti. You are studying medicine at the Graduate School of Arts and Science at Harvard University.',
+      'Actually, that\'s partly a lie. You are wild, and your gambling habit has recently gotten out of hand. You owe $10,000 to some very unsavory characters who are threatening damage to your limbs if you don\'t pay up. Also, you have been expelled from Harvard for gambling — your father will go crazy if he finds out.',
+      'You have confided in your Aunt Maria. As always, you are hoping she will bail you out. However, she has not been as sympathetic as usual and seems distracted by worries of her own.',
+      'You are fond of your cousin Eva, and she seems fond of you. You also like little Carmen, who is amusing and often confides in you.',
+      'Now, though, you have another distraction. Uncle Salvatore fetched you from your room earlier. Dinah, the cook, had found the body of Nick Johnson\'s valet in the kitchen. There was a glass next to the body with a strange smell and sediment in the bottom. Uncle Salvatore had called old Dr. Bruno to have a look too. You and the doctor are running some analysis on the sediment, and you should have the results in half an hour.',
+    ],
+    valet: 'The man seemed too young to have a heart attack, and the glass appears suspicious. Could it have been suicide? Still, no point speculating until the test results are finished.',
+    goals: [
+      'Your father: Avoid your family, and especially your father, finding out about your dismissal from college.',
+      'Money: Find $10,000 to pay your gambling debts, either from Aunt Maria, or any other route.',
+      'Family mystery: Find out what\'s going on between your Aunt Maria and Nick Johnson.',
+      'Valet\'s death: Help Uncle Salvatore manage the circumstances around the valet\'s death discreetly.',
+    ],
+    firstMoves: [
+      'Ask Aunt Maria again about bailing you out from your gambling debts.',
+      'Talk to Dr. Bruno about the tests you are doing on the wine glass.',
+    ],
+    otherPeople: [
+      { name: 'Jimmy Callas', note: 'You\'re not close to your father. He travels the world to deal in arts and antiquities, but keeps his life very private from you and the family. He\'ll be furious if he discovers you were expelled from Harvard.' },
+      { name: 'Maria', note: 'Your aunt provided you with a home since your mother died and treats you like a son. She has gotten you out of several money-related scrapes, but told you sharply to sort things out yourself this time.' },
+      { name: 'Salvatore', note: 'Although your uncle is stern, you greatly respect him. He looks tired and careworn lately. You are flattered that he\'s asked you to help investigate the valet\'s death.' },
+      { name: 'Guido', note: 'Your cousin is such a bore. He will really crow if he discovers you\'ve been thrown out of college.' },
+      { name: 'Reggie Vanni', note: 'A pleasant friend of Eva\'s that you haven\'t met before.' },
+      { name: 'Nick Johnson', note: 'You\'re not sure which bit of woodwork he crawled out from under, but you really don\'t like Nick. What is going on between him and Aunt Maria?' },
+      { name: 'Dr. Sal Bruno', note: 'The doctor\'s hands were shaky when you prepared the sediment for testing earlier. Just as well you were there to help, or you\'re not sure if you could have relied on the test results!' },
+      { name: 'Dinah Peretti', note: 'The temporary cook seemed shocked by the valet\'s death — but who wouldn\'t be? Has agreed to keep the glass secret for now.' },
+    ],
+    abilities: [
+      { name: 'Tough constitution', desc: 'Thanks to the sport you did at college, you are as sturdy as an ox and can ignore the effects of one dose of poison.', uses: 3 },
+      { name: 'Let\'s share what we know', desc: 'After talking to another player, show them your Clue. They must then show you their Clue.', uses: 3 },
+      { name: 'I\'ve bared my heart — you bare yours', desc: 'Reveal your Secret to another player — they must reveal their Secret to you.', uses: 2 },
+    ],
+    secret: 'You owe $10,000 in gambling debts and have been expelled from Harvard.',
+    clue: 'The wine glass found next to the valet\'s body contained a suspicious sediment.',
+  },
+  {
+    id: 'dr_sal_bruno',
+    name: 'Dr. Sal Bruno',
+    alias: null,
+    role: 'Retired family doctor',
+    initials: 'DB',
+    color: '#2A3A5A',
+    summary: 'The retired family doctor who loves the Morettis like his own. He has done something terrible to protect them, and it\'s gone very wrong.',
+    bio: [
+      'You are Dr. Sal Bruno, and you were the Moretti family\'s doctor. Although you are retired, you keep your doctor\'s paraphernalia with you out of habit. Nowadays, having no family of your own, you are treated as a dear old family friend and honorary grandparent to the Moretti youngsters.',
+      'You were horrified to see Niko Kontos turn up at the lodge. He is calling himself Nick Johnson and masquerading as an old friend of Maria\'s. You have a very personal reason for hating Niko. He seduced and shamed your dear niece, Lucy, resulting in her suicide. You are sure he does not realize who you are.',
+      'Worse, Maria confided in you many years ago that Eva may be Niko\'s daughter and not Salvatore\'s.',
+      'When Maria told you Niko was blackmailing her, that was the final straw. Even though it goes against your Hippocratic oath, you put some poison in a glass of wine after lunch and asked the valet to take it to Nick/Niko. The man had to be stopped.',
+      'Imagine your horror when Salvatore knocked on your door and told you the valet had been found dead in the kitchen! The foolish fellow had drunk it himself! Salvatore asked you and young Charlie Callas, a medical student, to go with him to the scene of death. There was the wine glass, with sediment in the bottom.',
+      'What a quandary. You have had to analyze the contents of the glass because of Charlie, and the results are due in half an hour. It will show that the valet was poisoned. You have murdered an innocent man.',
+      'What can you do now? You are old and don\'t care about yourself, but you care about Maria and the family. You may be able to eliminate Niko as Eva\'s father. Eva\'s blood type is O; if you analyze Niko\'s blood and discover that it\'s AB, you know he isn\'t Eva\'s father.',
+    ],
+    valet: 'Terrible. You feel so guilty about being responsible for the death of an innocent man.',
+    goals: [
+      'Niko Kontos: Use any means you can to prevent Niko from spoiling the happiness of the Moretti family.',
+      'Eva\'s parentage: If you can identify Eva\'s father through blood tests, then take it. Destroy the evidence if it turns out to be Niko.',
+      'You are a murderer: Find out if the valet was in on Niko\'s evil scheming. If he was, you might feel justified. If he wasn\'t, you might feel compelled to admit to the murder of an innocent man.',
+    ],
+    firstMoves: [
+      'Speak to Nick/Niko alone and warn him you know about his evil ways.',
+      'Speak to Charlie about your tests on the wine glass. Try not to make him suspicious.',
+    ],
+    otherPeople: [
+      { name: 'Nick Johnson', note: 'Actually Niko Kontos, an evil swine who should be purged from the world.' },
+      { name: 'Salvatore', note: 'You saw him grow up. You have every respect and admiration for him. He looks worried and preoccupied.' },
+      { name: 'Maria', note: 'You would do anything for Maria, especially in memory of your dear niece.' },
+      { name: 'Jimmy Callas', note: 'Jimmy is Maria\'s brother and would protect her. You think he may know of Niko. Should you take Jimmy into your confidence about what you have done?' },
+      { name: 'Charlie Callas', note: 'It\'s awkward having young Charlie be part of the investigation into the valet\'s death. You must be careful to seem surprised when poison is confirmed.' },
+      { name: 'Amelia Marchetti', note: 'Amelia is Donatella\'s marvelous friend. Her company is an absolute pleasure, but she has a reputation as an excellent detective, so you\'d better watch what you say.' },
+      { name: 'Eva', note: 'Eva is the Morettis\' eldest daughter. How would her life change if she discovered she was illegitimate and not Salvatore\'s daughter?' },
+      { name: 'Carmen', note: 'Carmen is the Morettis\' youngest daughter. She is lively and mischievous — it\'s hard to keep her out of anything.' },
+    ],
+    abilities: [
+      { name: 'Astute judge of character', desc: 'Another player must reveal their Secret to you.', uses: 3 },
+      { name: 'Sudden insight', desc: 'After talking to another player, you realize they\'ve revealed more than they intended. They must show you their Clue.', uses: 3 },
+      { name: 'Tough constitution', desc: 'Thanks to the long, hard hours of a community physician, you are as sturdy as an ox and can ignore the effects of one dose of poison.', uses: 2 },
+    ],
+    secret: 'Some years ago, Nick Johnson (or rather Niko Kontos, his real name) seduced and shamed your niece, driving her to suicide.',
+    clue: 'You know the blood types of: Salvatore, Guido, Carmen — type A; Maria — type B; Zia Donatella, Eva — type O.',
+  },
+  {
+    id: 'reggie_vanni',
+    name: 'Reggie Vanni',
+    alias: 'The Fox',
+    role: 'Friend of Eva\'s',
+    initials: 'RV',
+    color: '#6B6B2A',
+    summary: 'Eva\'s fashionable friend with no family and apparently no agenda. Both of those things are lies.',
+    bio: [
+      'You are Reggie Vanni, a friend of Eva\'s. You first met at a society ball a year or two ago, got on well, and you have visited her several times. You have no family of your own, and when Eva heard you had no plans for this time of year, she invited you to the Morettis\' annual gathering.',
+      'And while the above is true, there\'s much more to you than that. Eva (and her family) would be shocked if they knew that you were The Fox — the city\'s notorious cat-burglar. On your last visit to Eva, you noticed a small painting hanging in the drawing room. You suspected it was a painting by Maria Garzoni called Still Life with Lemons and Blossoms. It is! The rest of the family has no idea — it would be worth $1 million on the art circuit.',
+      'However, your underworld contacts have warned you that someone else, possibly from the FBI, has been asking questions about the painting too. So you must watch your back.',
+      'You brought a convincing copy with you. Last night, at about 3 am, you crept down to the drawing room in your mask and swapped the paintings over. Now all you need to do is make it through the next few days, and when the storm breaks, you can walk away with the original.',
+      'However, Eva dropped a bombshell on you a few moments ago. She said she saw her Uncle Jimmy, also in a mask, acting suspiciously in the drawing room at about 2 am last night and that he swapped the picture. At this precise moment, you have no idea if you have a genuine or a fake copy of the painting.',
+      'If you do have a fake painting, at least you have a genuine antique 1770s flintlock pistol that you took from Christy Cardone\'s room last night. You know a collector you can sell it to.',
+    ],
+    valet: 'There is enough at stake for you without this complication — especially if the police end up being involved. However, the fact that it was Nick\'s valet makes you suspicious.',
+    goals: [
+      'Protect your identity: Avoid attracting suspicion. You don\'t want anyone to suspect you are anything other than a relatively well-heeled and vacuous young person.',
+      'The painting: Find out what is going on with Jimmy and the painting. Walk away with the real Still Life with Lemons and Blossoms, with no one suspecting you of stealing it.',
+      'The Moretti Diamonds: Stealing these would be a bonus — but don\'t get caught!',
+      'Help Eva: Eva is worried about her mother. Help her however you can.',
+    ],
+    firstMoves: [
+      'Ask Jimmy Callas about what he does for a living.',
+      'Talk to Nick Johnson and learn what you can about his friendship with Maria.',
+    ],
+    otherPeople: [
+      { name: 'Eva', note: 'Eva is a charming, if a little spoilt, young woman you find very easy to talk to. She told you about her plans to set up a clothes design company and her father\'s reluctance to help her out with funding.' },
+      { name: 'Maria', note: 'Maria is a gracious hostess who has always been kind to you. As Eva says, though, she doesn\'t seem her usual sparkling self.' },
+      { name: 'Nick Johnson', note: 'Apparently, Nick is an old friend of Maria\'s, but Eva had never heard of him before. Frankly, he gives you the creeps. Does he seem like an FBI type?' },
+      { name: 'Zia Donatella', note: 'The old lady must have the Moretti Diamonds stashed around here somewhere, especially if she plans to hand them to Eva later tonight.' },
+      { name: 'Christy Cardone', note: 'Christy has an antique 1770s flintlock pistol that they planned to show to Jimmy.' },
+      { name: 'Jimmy Callas', note: 'Eva\'s uncle (and Maria\'s brother). Jimmy is a mystery man. Maybe he knows the actual value of the painting? Is he trying to steal it?' },
+      { name: 'Charlie Callas', note: 'Jimmy\'s son is studying medicine at Harvard. You have met him socially once or twice before.' },
+    ],
+    abilities: [
+      { name: 'You\'ve revealed more than you intended', desc: 'Another player has revealed more than they intended and must reveal their Secret to you.', uses: 3 },
+      { name: 'Pickpocket', desc: 'Tell the Consigliere what item you want to pickpocket from another player. If that player doesn\'t have it, the Consigliere will take something else at random.', uses: 2 },
+      { name: 'Not so fast!', desc: 'An ability played by another player has no effect — but they must still check off a circle. Cannot be used to cancel another Not so fast!. May be used if you are being pickpocketed.', uses: 2 },
+    ],
+    secret: 'Last night you swapped the picture in the drawing room for a fake.',
+    clue: 'Eva saw Uncle Jimmy swapping a picture in the drawing room last night.',
+  },
+  {
+    id: 'christy_cardone',
+    name: 'Christy Cardone',
+    alias: null,
+    role: 'Friend of Guido\'s — Harvard law student',
+    initials: 'ChC',
+    color: '#3A6B3A',
+    summary: 'Guido\'s Harvard friend, here for the holidays — and quietly on a mission worth up to a million dollars.',
+    bio: [
+      'You are at Harvard studying law with Guido Moretti and are tipped to become a brilliant lawyer. Your father, Dexter Cardone, is a self-made man who has made a fortune out of manufacturing.',
+      'You have encountered a fair bit of social snobbery because of your family background. Happily, you\'ve never experienced anything like that from Guido or his family.',
+      'When he invited you, Guido mentioned that his uncle, Jimmy, had expressed an interest in seeing the 1770s flintlock pistol that you have as a family heirloom. You brought it with you so that you can show Jimmy. It\'s in your room.',
+      'You have another reason for being here, however. Your father wants to invest in laundromats, both in manufacturing equipment and possibly co-owning locations. Rumor has it that Salvatore Moretti also has interests in this area.',
+      'Your father has also heard that Salvatore may have overstretched himself financially. Your father needs you to discover what you can about Mr. Moretti\'s plans and discuss investing in the business. Your father would be willing to invest up to $1,000,000 in exchange for 51% control.',
+      'You chanced to see Maria Moretti and Nick Johnson deep in conversation yesterday. Maria seemed unhappy and seemed to rush away in tears.',
+    ],
+    valet: 'The atmosphere at the lodge was already tense, and this death will not lighten the load. You feel sorry for Salvatore and Maria having to cope with the situation. Wasn\'t the valet a little young to suffer a heart attack?',
+    goals: [
+      'Your father\'s business deal: Find out more about Salvatore\'s business plans connected with the laundromats. Assess if this is a sound business prospect and broker a deal. Your father has given you authority to spend up to $1,000,000 for 51% ownership.',
+      'Support Guido: Guido is your friend, and he is the reason you are here tonight. Help him however you can.',
+      'Show Jimmy your flintlock: Show the flintlock to Jimmy. (See the Consigliere to retrieve it from your room.)',
+      'Get to know the Moretti family: They could be beneficial to you in your future career.',
+      'Maria and Nick relationship: You are curious about the incident you witnessed. Discover more about Nick Johnson.',
+    ],
+    firstMoves: [
+      'Ask Guido about his father\'s business and the rumor that he may be investing further in the laundromats.',
+      'Introduce yourself to Jimmy Callas, Salvatore\'s brother-in-law, and find out what he does.',
+    ],
+    otherPeople: [
+      { name: 'Guido', note: 'You are taking the same law course as Guido and have become friends, although you initially pursued the friendship because of his connections.' },
+      { name: 'Salvatore', note: 'Salvatore obviously loves his family very much. You need to find a way to open a conversation about business and especially his plans for the laundromats.' },
+      { name: 'Maria', note: 'Although charming and welcoming, your hostess seems very tense and worried.' },
+      { name: 'Jimmy Callas', note: 'According to Guido, Jimmy is interested in seeing your 1770s flintlock pistol.' },
+      { name: 'Nick Johnson', note: 'You saw Nick and Maria having what appeared to be a very unhappy conversation. You didn\'t take to him very much.' },
+      { name: 'Eva', note: 'Guido\'s older sister. You have met Eva briefly at Harvard when she has visited Guido. She is vivacious and outgoing, but you get the impression she is a little spoilt.' },
+    ],
+    abilities: [
+      { name: 'Sudden insight', desc: 'After talking to another player, you realize they\'ve revealed more than they intended. They must show you their Clue.', uses: 3 },
+      { name: 'You\'ve revealed more than you intended', desc: 'Another player has revealed more than they intended and must reveal their Secret to you.', uses: 2 },
+      { name: 'Flattery', desc: 'If you flatter another player, they must read out to you the first goal listed on their character sheet.', uses: 3 },
+    ],
+    secret: 'Your father has asked you to investigate the possibility of a business partnership with Salvatore Moretti.',
+    clue: 'You saw Maria Moretti and Nick Johnson having a dispute. Maria went away crying.',
+  },
+  {
+    id: 'amelia_marchetti',
+    name: 'Amelia Marchetti',
+    alias: null,
+    role: 'Amateur detective — Donatella\'s oldest friend',
+    initials: 'AM',
+    color: '#5A2A6B',
+    summary: 'Donatella\'s oldest friend and, back home, a formidable detective. She has already noticed things nobody else has.',
+    bio: [
+      'You are Amelia Marchetti, amateur detective and a school friend of Zia Donatella, who you know as Donna. You are joining your good friend for her family\'s Christmas Eve gathering, but you think this may be your last visit to America, as you are getting too elderly to travel comfortably.',
+      'Your family emigrated to America when you were 15 years old. You met Donatella at school and have been the closest of friends ever since, writing and visiting frequently since your family returned to Italy.',
+      'You think the Morettis see you as a dear, sweet, quaint and rather nosy old lady — which you are. But back home, you have earned the reputation of being a formidable detective who has helped solve many crimes through your understanding of human nature and your sharp powers of observation.',
+      'You share Donatella\'s greatest secret — that she was once secretly engaged to Rory Calhoun, the love of her life. Rory was killed in an army training exercise shortly before Donatella discovered she was pregnant. Her father hushed this up and arranged to have the baby adopted. The poor little mite was a girl, and you slipped your silver locket around her neck before she was taken away.',
+      'Donatella has shown you a horrible anonymous note she received a few days ago. It simply says, \'I know what you gave away.\' Donatella has also confided that she seems to have misplaced her Moretti Diamonds! In your experience, something of that value is rarely \'misplaced.\'',
+      'You have watched everyone closely over the last few days, and you are worried for your friend and her family — you can\'t help feeling there is something evil going on.',
+    ],
+    valet: 'It\'s always so sad to hear of the death of a young person. But what could have brought on a heart attack? With so much going on, was it really death from natural causes?',
+    goals: [
+      'Support Donatella: Donatella is your good friend, support and help her however you can.',
+      'The Moretti Diamonds: Find out what has happened to them — are they \'misplaced\' or maybe stolen? Then, restore them to Donatella in time for them to be handed to Eva.',
+      'The note: Discover who sent the sinister note to Donatella and why, and what they want.',
+      'Maria and Salvatore: Find out what is going on between them and why they look so unhappy.',
+      'Nick Johnson: Find out more about him and his connection with Dinah, the cook.',
+    ],
+    firstMoves: [
+      'Help Donatella remember what she might have done with the diamonds. Reassure her about the mysterious note and promise you will help.',
+      'Ask everyone what they know about Nick. Try to find out from Dinah Peretti what their discussion was about.',
+    ],
+    otherPeople: [
+      { name: 'Zia Donatella', note: 'You have a wonderful friendship. Help her remember what she did with the diamonds and help her get to the bottom of that disgraceful note.' },
+      { name: 'Salvatore', note: 'Your host, Salvatore, is a family man through and through, but things between him and Maria appear strained.' },
+      { name: 'Maria', note: 'Maria is such a charming woman! But she looks worried — and you have seen her having what looked like words with Nick Johnson.' },
+      { name: 'Charlie Callas', note: 'Charlie has quite a wild streak and is in trouble again, if you\'re not mistaken. You saw him talking earnestly to Aunt Maria — you saw her shake her head sorrowfully at him.' },
+      { name: 'Jimmy Callas', note: 'You understand that Jimmy is in the arts and antiquities business. You think that his air of dreaminess and vagueness hides a very sharp mind.' },
+      { name: 'Dr. Sal Bruno', note: 'It is lovely to see the old doctor again. For the last day or so, the doctor has looked terrible. You\'ve seen them muttering to themselves, seemingly in a great dilemma.' },
+      { name: 'Carmen', note: 'Carmen is Salvatore and Maria\'s younger daughter. She has asked you for tips about detecting The Fox.' },
+    ],
+    abilities: [
+      { name: 'What can you tell me about that person over there?', desc: 'After talking to another player, indicate a third player. The player you are talking to must tell you everything their Other People section says about that third player. Do not cross off a use if the third player isn\'t mentioned.', uses: 3 },
+      { name: 'I\'d like to ask you a few questions...', desc: 'Speak to another player and reveal that you are an amateur detective. They must reveal their Clue to you. One use per player.', uses: 1, perPlayer: true },
+      { name: 'Astute judge of character', desc: 'Another player must reveal their Secret to you.', uses: 2 },
+    ],
+    secret: 'You helped Donatella cover up the existence of the child she once had, and now are helping her secretly look for the lost Moretti Diamonds.',
+    clue: 'Zia Donatella recently received a threatening note.',
+  },
+  {
+    id: 'dinah_peretti',
+    name: 'Dinah Peretti',
+    alias: null,
+    role: 'Temporary cook',
+    initials: 'DP',
+    color: '#8B6B3A',
+    summary: 'The temporary cook who found the body this afternoon. She is here for reasons of her own that have nothing to do with cooking.',
+    bio: [
+      'You are Dinah Peretti, a good cook looking for a job. You have no family and are delighted to have landed this temporary job, even if it\'s only for the party. It\'s nice to have a change of scenery.',
+      'Some of that is a lie. You are an excellent cook, but you do already have a job. You are working here during your vacation to learn more about your past. You were adopted as a baby, and the only clue you had to your identity is a small silver locket that carries the inscription \'Forever Friends.\'',
+      'A few months ago, Niko Kontos contacted you. Niko claims to have a letter proving that Zia Donatella had an illegitimate daughter given into an orphanage\'s care. Niko believes you are that child. If this were true, you could end up quite wealthy and, at the very least, in possession of the famous Moretti Diamonds.',
+      'You do not like or trust Niko. He seems to have some hold over Maria Moretti, as she is colluding in his pretense of being an old friend called Nick Johnson.',
+      'Niko wanted you to join him in blackmailing Zia Donatella. He told you he has sent Donatella a threatening note saying, \'I know what you gave away.\' You were angry about this. You want what is legally due to you — but you do NOT agree with blackmail.',
+      'There\'s one thing that Niko doesn\'t know, which may help. The first time you met Zia Donatella, you noticed she was wearing an identical silver locket to the one you have!',
+      'Finding the body of Niko\'s valet in the kitchen this afternoon was a real shock. You immediately fetched Salvatore. There was an empty wine glass next to the body, it smelled odd, and there was sediment in the glass. You have been sworn to secrecy about these circumstances.',
+    ],
+    valet: 'It looks suspicious to you. You\'re sure Niko will want to hear about you finding the body. Should you tell him about the glass?',
+    goals: [
+      'Your identity: Find out if you are Zia Donatella\'s daughter. If you are, who was your father and why did they give you away?',
+      'Niko and Maria: What hold does Niko have over Maria? And decide whether you should help her or not.',
+      'Do what is right: Avoid being implicated in any evil scheme of Niko\'s. Make sure that any means you use are above board.',
+      'Wealth and riches: Find out if you are legally entitled to anything — and if you are, go all out to get it.',
+    ],
+    firstMoves: [
+      'Talk to Niko/Nick and discover what he is planning.',
+      'Speak to Amelia Marchetti to see if you could trust her to help you with approaching Zia Donatella.',
+    ],
+    otherPeople: [
+      { name: 'Nick Johnson', note: 'His real name is Niko Kontos, and you don\'t trust him. Although he is helping you find your mother, you\'re sure it\'s not out of the goodness of his heart!' },
+      { name: 'Salvatore', note: 'Salvatore seems like a decent man.' },
+      { name: 'Maria', note: 'Maria has been lovely to you and seems grateful that you have taken the temporary position. She looks very nervous and upset about something, though, which seems to relate to Niko.' },
+      { name: 'Zia Donatella', note: 'Can she really be your mother? What could have made her give you away, if so?' },
+      { name: 'Amelia Marchetti', note: 'An elderly lady who seems great friends with Donatella. You hear that she is a famous detective. She has certainly given you a few sharp looks, which makes you nervous.' },
+      { name: 'Eva', note: 'Eva is Donatella\'s oldest great-niece and is next in line for the Moretti Diamonds. She seems spoilt, to you.' },
+      { name: 'Carmen', note: 'The youngest great-niece. Her pet monkey is a real nuisance, though.' },
+    ],
+    abilities: [
+      { name: 'Sudden insight', desc: 'After talking to another player, you realize they\'ve revealed more than they intended. They must show you their Clue.', uses: 3 },
+      { name: 'Nobody notices a servant', desc: 'When you see a conversation taking place that you\'d like to secretly overhear, tell the Consigliere, and they will listen in and report back to you what\'s being talked about. Please do not play this if the Consigliere is busy!', uses: 3 },
+      { name: 'Success!', desc: 'You can make a failed or tied rock-paper-scissors challenge succeed. It does not have to be a challenge you are involved in.', uses: 3 },
+    ],
+    secret: 'Nick\'s real name is Niko Kontos, and he believes you are Zia Donatella\'s illegitimate daughter.',
+    clue: 'An empty wine glass was found next to the valet\'s body, with sediment in the bottom.',
+  },
+  {
+    id: 'enzo_rizzo',
+    name: 'Enzo Rizzo',
+    alias: null,
+    role: 'Butler and family fixer',
+    initials: 'ER',
+    color: '#3A3030',
+    summary: 'The butler who sees everything and says nothing. He knows exactly what this family really is — and he\'s completely loyal to it.',
+    bio: [
+      'You are Enzo Rizzo, the butler/housekeeper — and, when it\'s needed, something more. You have been in the employ of Mr. Salvatore Moretti and his wife, Maria, for many years, and in that time you\'ve learned to handle the sort of problems that never get written down. You are very loyal to the family, and they trust you with things they\'d never tell each other.',
+      'You usually enjoy the annual trip to the lodge; it\'s a change of scenery, and it\'s good to see Mr. Salvatore relaxing with the family. However, this year, not all is running as smoothly as usual.',
+      'Your first problem was finding a replacement when your usual cook was called away to her mother\'s sickbed. You and Mrs. Moretti were relieved to find Dinah Peretti as a temporary replacement, although you didn\'t have time to take proper references for her.',
+      'Then there\'s Mr. Nick Johnson, a surprise guest who claims to be an old friend of Mrs. Moretti. Mrs. Moretti doesn\'t seem that pleased to see him, but you made up a room for him. You were surprised to see Dinah talking at length to Mr. Johnson.',
+      'Mr. and Mrs. Moretti both seem out of sorts and very subdued. Young Miss Carmen is also a worry. You were taking some fresh linen to her room yesterday and saw a diamond necklace on the dressing table!',
+      'Finally, there is the death of the valet this morning. Mr. Moretti has kept you in his confidence. There was an empty wine glass next to the body, with a strange residue at the bottom.',
+      'Mr. Jimmy Callas is an interesting fellow. Last year he took you into his confidence. He works as an agent for the FBI, investigating thefts of art. You would never have guessed if he hadn\'t told you.',
+    ],
+    valet: 'It does look suspicious — and Dinah \'found\' the body, which adds to your suspicion about her. You also have your doubts about the valet\'s employer, Mr. Johnson.',
+    goals: [
+      'Keep Miss Carmen out of trouble: Talk to Miss Carmen about the diamond necklace and discover where it has come from.',
+      'Keep an eye on Dinah: You have doubts about Dinah\'s dedication to the job.',
+      'Protect the Moretti family: You are pleased to have been taken into Mr. Moretti\'s confidence about the valet\'s death, and will assist your employer however you can.',
+      'Help Mr. Jimmy Callas: Or at least find out what he\'s worried about.',
+    ],
+    firstMoves: [
+      'Tell Miss Carmen you were taking linen to her room and couldn\'t help noticing the necklace.',
+      'Ask Dinah Peretti if she knows Mr. Johnson.',
+    ],
+    otherPeople: [
+      { name: 'Mr. and Mrs. Moretti', note: 'Your employers. You have worked for the family for a long time, and you are loyal to them — loyal enough that you know more about Mr. Moretti\'s real business than almost anyone.' },
+      { name: 'Miss Eva, Mr. Guido, Miss Carmen', note: 'You have known them since they were babies. You are particularly fond of Miss Carmen, and have often helped her in the past.' },
+      { name: 'Mr. Jimmy Callas', note: 'Maria\'s older brother. You know that he also works for the FBI, investigating art crimes.' },
+      { name: 'Mr. Charlie Callas', note: 'Jimmy\'s son and Mrs. Moretti\'s nephew. Charlie is treated like a second son, having lost his mother some time ago.' },
+      { name: 'Zia Donatella', note: 'Mr. Moretti\'s elderly great-aunt is often forgetful these days. She owns some diamonds — but you\'re sure they\'re not the ones you saw in Miss Carmen\'s room.' },
+      { name: 'Miss Amelia Marchetti', note: 'The elderly friend of Zia Donatella, rumored to be a famed detective.' },
+      { name: 'Mr. Nick Johnson', note: 'This gentleman turned up a few days ago and said he was an old friend of Mrs. Moretti. She doesn\'t seem pleased to see him.' },
+      { name: 'Dinah Peretti', note: 'Dinah is a marvelous cook, but since you saw her talking intently to Nick Johnson, you have a nagging doubt about her.' },
+    ],
+    abilities: [
+      { name: 'Astute judge of character', desc: 'Another player must reveal their Secret to you.', uses: 3 },
+      { name: 'Nobody notices a servant', desc: 'When you see a conversation taking place that you\'d like to secretly overhear, tell the Consigliere, and they will listen in and report back to you what\'s being talked about. Please do not play this if the Consigliere is busy!', uses: 3 },
+      { name: 'I couldn\'t possibly comment', desc: 'You are extremely discreet. If anyone plays an ability on you to make you reveal your Clue, a goal, or information about another person, you can ignore it. But they must still check off a circle.', uses: 2 },
+    ],
+    secret: 'You have no secrets. (If someone uses an ability to make you reveal this, they do not have to check off a use of it.)',
+    clue: 'You saw what appeared to be a diamond necklace in Miss Carmen\'s room a day ago.',
+  },
+];
+
+// ── Color lookup for Other People avatars ──
+const CHAR_COLORS = {};
+CHARACTERS.forEach(c => { CHAR_COLORS[c.id] = c.color; });
+const NAME_KEYS = {
+  'salvatore': 'salvatore_moretti', 'maria': 'maria_moretti', 'eva': 'eva_moretti',
+  'nick': 'nick_johnson', 'guido': 'guido_moretti', 'carmen': 'carmen_moretti',
+  'donatella': 'zia_donatella', 'zia donatella': 'zia_donatella', 'jimmy': 'jimmy_callas',
+  'charlie': 'charlie_callas', 'dr. bruno': 'dr_sal_bruno', 'dr bruno': 'dr_sal_bruno',
+  'dr. sal bruno': 'dr_sal_bruno', 'sal bruno': 'dr_sal_bruno', 'reggie': 'reggie_vanni',
+  'christy': 'christy_cardone', 'amelia': 'amelia_marchetti', 'dinah': 'dinah_peretti',
+  'enzo': 'enzo_rizzo',
+};
+function colorFor(name) {
+  const k = name.toLowerCase().replace(/^(mr\.|mrs\.|miss|dr\.|zia)\s+/i,'').trim();
+  for (const [key, id] of Object.entries(NAME_KEYS)) {
+    if (k.startsWith(key)) return CHAR_COLORS[id] || '#6B5E50';
+  }
+  return '#6B5E50';
+}
+function initialsFor(name) {
+  const clean = name.replace(/^(Mr\.|Mrs\.|Miss|Dr\.|Zia)\s+/i,'').trim();
+  const parts = clean.split(/[\s,&]+/);
+  return (parts[0][0] + (parts[1]?.[0] || '')).toUpperCase();
+}
+
+// ── APP ──
+const { createApp, ref, onMounted } = Vue;
+
+createApp({
+  setup() {
+    const char      = ref(null);
+    const uses      = ref([]);
+    const bioOpen   = ref(false);
+    const revSecret = ref(false);
+    const revClue   = ref(false);
+    const rulesOpen = ref(false);
+
+    onMounted(() => {
+      const id = sessionStorage.getItem('sicilian_char_id');
+      if (!id || id === '_orchestrator') { window.location.href = '../login/index.html'; return; }
+      const found = CHARACTERS.find(c => c.id === id);
+      if (!found) { window.location.href = '../login/index.html'; return; }
+      char.value = found;
+
+      // Load or initialise ability uses from localStorage
+      const saved = localStorage.getItem(`sicilian_uses_${id}`);
+      uses.value = saved ? JSON.parse(saved) : found.abilities.map(() => 0);
+    });
+
+    function save() {
+      if (char.value) localStorage.setItem(`sicilian_uses_${char.value.id}`, JSON.stringify(uses.value));
+    }
+
+    function toggle(ai, n) {
+      uses.value[ai] = (n <= uses.value[ai]) ? n - 1 : n;
+      save();
+    }
+    function inc(ai) { uses.value[ai]++; save(); }
+    function dec(ai) { if (uses.value[ai] > 0) { uses.value[ai]--; save(); } }
+
+    function logout() {
+      sessionStorage.removeItem('sicilian_char_id');
+      window.location.href = '../login/index.html';
+    }
+
+    return {
+      char, uses, bioOpen, revSecret, revClue, rulesOpen,
+      toggle, inc, dec, logout, colorFor, initialsFor,
+    };
+  }
+}).mount('#app');
+
+</script>
+</body>
+</html>

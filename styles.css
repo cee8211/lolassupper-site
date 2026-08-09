@@ -594,6 +594,24 @@ body {
   background: var(--bg-card);
 }
 
+.archive-card-visual--mezcal {
+  background: #1a130a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.archive-visual-text {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 700;
+  color: #c8a96e;
+  text-align: center;
+  line-height: 1.15;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .archive-menu-img {
   width: 100%;
   height: 100%;
