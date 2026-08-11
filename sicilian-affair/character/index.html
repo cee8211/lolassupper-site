@@ -500,6 +500,97 @@
     }
     .rule-text strong { color: var(--ink); font-weight: 600; }
 
+    /* ── PREVIEW / COUNTDOWN ── */
+    .preview {
+      padding: 32px 20px 60px;
+      max-width: 480px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .preview-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+    .preview-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.9rem;
+      font-weight: 400;
+      text-align: center;
+      color: var(--ink);
+      line-height: 1.15;
+      margin-bottom: 4px;
+    }
+    .preview-role {
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .preview-card {
+      width: 100%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 22px 20px;
+      margin-bottom: 36px;
+    }
+    .preview-summary {
+      font-size: 1.05rem;
+      font-style: italic;
+      line-height: 1.78;
+      color: var(--ink-dim);
+    }
+    .preview-sealed-label {
+      font-size: 0.58rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+    .countdown {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    .cd-unit { text-align: center; min-width: 52px; }
+    .cd-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1;
+      display: block;
+    }
+    .cd-label {
+      font-size: 0.55rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: block;
+      margin-top: 5px;
+    }
+    .cd-sep {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: var(--muted);
+      opacity: 0.3;
+      padding-top: 2px;
+      user-select: none;
+    }
+
     /* ── LOGOUT ── */
     .logout-row {
       text-align: center;
@@ -535,8 +626,42 @@
       <button class="rules-btn" @click="rulesOpen = true">Rules</button>
     </div>
 
-    <!-- ── PAGE CONTENT ── -->
-    <div class="page">
+    <!-- ── PREVIEW (before reveal) ── -->
+    <div v-if="!isRevealed" class="preview">
+      <div class="preview-avatar" :style="{ background: char.color }">{{ char.initials }}</div>
+      <h2 class="preview-name">{{ char.name }}</h2>
+      <p class="preview-role">{{ char.role }}</p>
+      <div class="preview-card">
+        <p class="preview-summary">{{ char.summary }}</p>
+      </div>
+      <p class="preview-sealed-label">Your full dossier is sealed</p>
+      <div v-if="countdown" class="countdown">
+        <template v-if="countdown.days > 0">
+          <div class="cd-unit">
+            <span class="cd-num">{{ countdown.days }}</span>
+            <span class="cd-label">{{ countdown.days === 1 ? 'day' : 'days' }}</span>
+          </div>
+          <span class="cd-sep">:</span>
+        </template>
+        <div class="cd-unit">
+          <span class="cd-num">{{ String(countdown.hours).padStart(2,'0') }}</span>
+          <span class="cd-label">hrs</span>
+        </div>
+        <span class="cd-sep">:</span>
+        <div class="cd-unit">
+          <span class="cd-num">{{ String(countdown.mins).padStart(2,'0') }}</span>
+          <span class="cd-label">min</span>
+        </div>
+        <span class="cd-sep">:</span>
+        <div class="cd-unit">
+          <span class="cd-num">{{ String(countdown.secs).padStart(2,'0') }}</span>
+          <span class="cd-label">sec</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FULL PAGE CONTENT (after reveal) ── -->
+    <div v-if="isRevealed" class="page">
 
       <!-- OVERVIEW -->
       <div class="section">
@@ -1412,8 +1537,11 @@ function initialsFor(name) {
   return (parts[0][0] + (parts[1]?.[0] || '')).toUpperCase();
 }
 
+// ── REVEAL TIME: 9am CET (UTC+1) Wednesday 19 August 2026 ──
+const REVEAL_AT = new Date('2026-08-19T09:00:00+01:00').getTime();
+
 // ── APP ──
-const { createApp, ref, onMounted } = Vue;
+const { createApp, ref, computed, onMounted } = Vue;
 
 createApp({
   setup() {
@@ -1423,6 +1551,18 @@ createApp({
     const revSecret = ref(false);
     const revClue   = ref(false);
     const rulesOpen = ref(false);
+    const now       = ref(Date.now());
+
+    const isRevealed = computed(() => now.value >= REVEAL_AT);
+    const countdown  = computed(() => {
+      const diff = REVEAL_AT - now.value;
+      if (diff <= 0) return null;
+      const days  = Math.floor(diff / 86400000);
+      const hours = Math.floor((diff % 86400000) / 3600000);
+      const mins  = Math.floor((diff % 3600000) / 60000);
+      const secs  = Math.floor((diff % 60000) / 1000);
+      return { days, hours, mins, secs };
+    });
 
     onMounted(() => {
       const id = sessionStorage.getItem('sicilian_char_id');
@@ -1434,6 +1574,14 @@ createApp({
       // Load or initialise ability uses from localStorage
       const saved = localStorage.getItem(`sicilian_uses_${id}`);
       uses.value = saved ? JSON.parse(saved) : found.abilities.map(() => 0);
+
+      // Tick countdown every second until reveal
+      if (Date.now() < REVEAL_AT) {
+        const timer = setInterval(() => {
+          now.value = Date.now();
+          if (now.value >= REVEAL_AT) clearInterval(timer);
+        }, 1000);
+      }
     });
 
     function save() {
@@ -1454,6 +1602,7 @@ createApp({
 
     return {
       char, uses, bioOpen, revSecret, revClue, rulesOpen,
+      isRevealed, countdown,
       toggle, inc, dec, logout, colorFor, initialsFor,
     };
   }
