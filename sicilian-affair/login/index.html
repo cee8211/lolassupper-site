@@ -494,14 +494,11 @@ createApp({
     const error       = ref('');
     const currentChar = ref(null);
 
-    // Restore session across page refreshes
+    // Landing on the login page always clears any prior session so the
+    // browser back button (or a manual visit) doesn't bounce the guest
+    // back to their character page in an infinite loop.
     onMounted(() => {
-      const savedId = sessionStorage.getItem('sicilian_char_id');
-      if (savedId) {
-        if (savedId === '_orchestrator') { window.location.href = '../orchestrator/index.html'; return; }
-        const entry = Object.values(PASSWORD_MAP).find(c => c.id === savedId);
-        if (entry) { window.location.href = '../character/index.html'; return; }
-      }
+      sessionStorage.removeItem('sicilian_char_id');
     });
 
     function unlock() {
