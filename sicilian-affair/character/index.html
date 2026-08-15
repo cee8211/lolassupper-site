@@ -1596,6 +1596,10 @@ createApp({
       const saved = localStorage.getItem(`sicilian_uses_${id}`);
       uses.value = saved ? JSON.parse(saved) : found.abilities.map(() => 0);
 
+      // If the game has already started by the time this page loads,
+      // reset immediately (only once per character).
+      maybeResetForGameStart();
+
       // Tick every second until we've passed both the reveal and the
       // game-start moment, so both isRevealed and isLive flip live if
       // the page happens to stay open across either boundary.
@@ -1603,6 +1607,7 @@ createApp({
       if (Date.now() < stopAt) {
         const timer = setInterval(() => {
           now.value = Date.now();
+          maybeResetForGameStart();  // fires the moment we cross 5pm
           if (now.value >= stopAt) clearInterval(timer);
         }, 1000);
       }
@@ -1610,6 +1615,20 @@ createApp({
 
     function save() {
       if (char.value) localStorage.setItem(`sicilian_uses_${char.value.id}`, JSON.stringify(uses.value));
+    }
+
+    // Wipe ability uses the first time this character's page notices we've
+    // crossed GAME_START_AT — so every player starts the game with a clean
+    // sheet, regardless of how much they'd toggled during the preview days.
+    // Idempotent: a per-character flag in localStorage stops it firing twice.
+    function maybeResetForGameStart() {
+      if (!char.value) return;
+      if (Date.now() < GAME_START_AT) return;
+      const flagKey = `sicilian_gamestart_reset_${char.value.id}`;
+      if (localStorage.getItem(flagKey)) return;
+      uses.value = char.value.abilities.map(() => 0);
+      save();
+      localStorage.setItem(flagKey, '1');
     }
 
     function toggle(ai, n) {
