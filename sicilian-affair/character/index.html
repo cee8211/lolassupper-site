@@ -286,6 +286,17 @@
     }
 
     /* ── ABILITIES ── */
+    .abilities-locked-note {
+      font-size: 0.82rem;
+      line-height: 1.45;
+      color: var(--red);
+      background: rgba(139,26,26,0.06);
+      border: 1px solid rgba(139,26,26,0.2);
+      border-radius: 2px;
+      padding: 9px 12px;
+      margin-bottom: 12px;
+      font-style: italic;
+    }
     .abilities-list { display: flex; flex-direction: column; gap: 12px; }
     .ability-card {
       background: var(--card);
@@ -726,6 +737,7 @@
       <!-- ABILITIES -->
       <div class="section">
         <div class="section-title">Abilities</div>
+        <p v-if="isLive" class="abilities-locked-note">Game is live — uses can be marked but not undone. Ask the Consigliere if you need to fix a mistake.</p>
         <div class="abilities-list">
           <div class="ability-card" v-for="(ab, ai) in char.abilities" :key="ai">
             <div class="ability-name">{{ ab.name }}</div>
@@ -1543,6 +1555,11 @@ function initialsFor(name) {
 // ── REVEAL TIME: 9am CET (UTC+1) Wednesday 19 August 2026 ──
 const REVEAL_AT = new Date('2026-08-19T09:00:00+01:00').getTime();
 
+// ── GAME START: 5pm CET (UTC+2 in August) Saturday 22 August 2026 ──
+// Once we cross this, players can only mark uses SPENT — they can no
+// longer un-check a circle to recover a use.
+const GAME_START_AT = new Date('2026-08-22T17:00:00+02:00').getTime();
+
 // ── APP ──
 const { createApp, ref, computed, onMounted } = Vue;
 
@@ -1557,6 +1574,7 @@ createApp({
     const now       = ref(Date.now());
 
     const isRevealed = computed(() => now.value >= REVEAL_AT);
+    const isLive     = computed(() => now.value >= GAME_START_AT);
     const countdown  = computed(() => {
       const diff = REVEAL_AT - now.value;
       if (diff <= 0) return null;
@@ -1578,11 +1596,14 @@ createApp({
       const saved = localStorage.getItem(`sicilian_uses_${id}`);
       uses.value = saved ? JSON.parse(saved) : found.abilities.map(() => 0);
 
-      // Tick countdown every second until reveal
-      if (Date.now() < REVEAL_AT) {
+      // Tick every second until we've passed both the reveal and the
+      // game-start moment, so both isRevealed and isLive flip live if
+      // the page happens to stay open across either boundary.
+      const stopAt = Math.max(REVEAL_AT, GAME_START_AT);
+      if (Date.now() < stopAt) {
         const timer = setInterval(() => {
           now.value = Date.now();
-          if (now.value >= REVEAL_AT) clearInterval(timer);
+          if (now.value >= stopAt) clearInterval(timer);
         }, 1000);
       }
     });
@@ -1592,11 +1613,21 @@ createApp({
     }
 
     function toggle(ai, n) {
-      uses.value[ai] = (n <= uses.value[ai]) ? n - 1 : n;
+      const current = uses.value[ai];
+      if (n <= current) {
+        // Trying to un-check a circle — only allowed before the game starts.
+        if (isLive.value) return;
+        uses.value[ai] = n - 1;
+      } else {
+        uses.value[ai] = n;
+      }
       save();
     }
     function inc(ai) { uses.value[ai]++; save(); }
-    function dec(ai) { if (uses.value[ai] > 0) { uses.value[ai]--; save(); } }
+    function dec(ai) {
+      if (isLive.value) return;
+      if (uses.value[ai] > 0) { uses.value[ai]--; save(); }
+    }
 
     function logout() {
       sessionStorage.removeItem('sicilian_char_id');
@@ -1605,7 +1636,7 @@ createApp({
 
     return {
       char, uses, bioOpen, revSecret, revClue, rulesOpen,
-      isRevealed, countdown,
+      isRevealed, isLive, countdown,
       toggle, inc, dec, logout, colorFor, initialsFor,
     };
   }
