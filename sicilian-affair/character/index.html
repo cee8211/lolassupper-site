@@ -298,6 +298,52 @@
       font-style: italic;
     }
     .abilities-list { display: flex; flex-direction: column; gap: 12px; }
+
+    /* Sealed abilities — blurred until 5pm CET Saturday when the game begins */
+    .abilities-wrap { position: relative; }
+    .abilities-list--sealed {
+      filter: blur(7px);
+      user-select: none;
+      pointer-events: none;
+      transition: filter 0.35s;
+    }
+    .abilities-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      background: rgba(246,242,235,0.55);
+      backdrop-filter: blur(2px);
+      border: 1px solid var(--gold-border);
+      border-radius: 2px;
+    }
+    .abilities-overlay-label {
+      font-family: 'Playfair Display', serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+    .abilities-overlay-text {
+      font-size: 0.98rem;
+      font-style: italic;
+      line-height: 1.5;
+      color: var(--ink-dim);
+      max-width: 280px;
+      margin-bottom: 14px;
+    }
+    .abilities-overlay-time {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: 0.04em;
+    }
     .ability-card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -738,24 +784,35 @@
       <div class="section">
         <div class="section-title">Abilities</div>
         <p v-if="isLive" class="abilities-locked-note">Game is live — uses can be marked but not undone. Ask the Consigliere if you need to fix a mistake.</p>
-        <div class="abilities-list">
-          <div class="ability-card" v-for="(ab, ai) in char.abilities" :key="ai">
-            <div class="ability-name">{{ ab.name }}</div>
-            <div class="ability-desc">{{ ab.desc }}</div>
-            <div v-if="ab.perPlayer" class="per-player-counter">
-              <button class="counter-btn" @click="dec(ai)">−</button>
-              <div>
-                <div class="counter-val">{{ uses[ai] }}</div>
-                <div class="counter-label">players used on</div>
+
+        <div class="abilities-wrap">
+          <div class="abilities-list" :class="{ 'abilities-list--sealed': !isLive }">
+            <div class="ability-card" v-for="(ab, ai) in char.abilities" :key="ai">
+              <div class="ability-name">{{ ab.name }}</div>
+              <div class="ability-desc">{{ ab.desc }}</div>
+              <div v-if="ab.perPlayer" class="per-player-counter">
+                <button class="counter-btn" @click="dec(ai)">−</button>
+                <div>
+                  <div class="counter-val">{{ uses[ai] }}</div>
+                  <div class="counter-label">players used on</div>
+                </div>
+                <button class="counter-btn" @click="inc(ai)">+</button>
               </div>
-              <button class="counter-btn" @click="inc(ai)">+</button>
+              <div v-else class="ability-circles">
+                <button
+                  v-for="n in ab.uses" :key="n"
+                  :class="['use-circle', n <= uses[ai] ? 'filled' : '']"
+                  @click="toggle(ai, n)"
+                ></button>
+              </div>
             </div>
-            <div v-else class="ability-circles">
-              <button
-                v-for="n in ab.uses" :key="n"
-                :class="['use-circle', n <= uses[ai] ? 'filled' : '']"
-                @click="toggle(ai, n)"
-              ></button>
+          </div>
+
+          <div v-if="!isLive" class="abilities-overlay">
+            <p class="abilities-overlay-label">Sealed</p>
+            <p class="abilities-overlay-text">Your abilities unlock when the game begins</p>
+            <div v-if="gameCountdown" class="abilities-overlay-time">
+              <template v-if="gameCountdown.days > 0">{{ gameCountdown.days }}d&nbsp;</template>{{ String(gameCountdown.hours).padStart(2,'0') }}h {{ String(gameCountdown.mins).padStart(2,'0') }}m {{ String(gameCountdown.secs).padStart(2,'0') }}s
             </div>
           </div>
         </div>
@@ -1584,6 +1641,15 @@ createApp({
       const secs  = Math.floor((diff % 60000) / 1000);
       return { days, hours, mins, secs };
     });
+    const gameCountdown = computed(() => {
+      const diff = GAME_START_AT - now.value;
+      if (diff <= 0) return null;
+      const days  = Math.floor(diff / 86400000);
+      const hours = Math.floor((diff % 86400000) / 3600000);
+      const mins  = Math.floor((diff % 3600000) / 60000);
+      const secs  = Math.floor((diff % 60000) / 1000);
+      return { days, hours, mins, secs };
+    });
 
     onMounted(() => {
       const id = sessionStorage.getItem('sicilian_char_id');
@@ -1655,7 +1721,7 @@ createApp({
 
     return {
       char, uses, bioOpen, revSecret, revClue, rulesOpen,
-      isRevealed, isLive, countdown,
+      isRevealed, isLive, countdown, gameCountdown,
       toggle, inc, dec, logout, colorFor, initialsFor,
     };
   }
