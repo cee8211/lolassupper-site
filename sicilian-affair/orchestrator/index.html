@@ -116,6 +116,99 @@
       margin-bottom: 20px;
     }
 
+    /* ── WELCOME ANNOUNCEMENT ── */
+    .announce {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--gold);
+      border-radius: 3px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .announce-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 14px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .announce-head-text { flex: 1; }
+    .announce-label {
+      font-size: 0.62rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+    .announce-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.02rem;
+      font-weight: 400;
+      color: var(--cream);
+    }
+    .announce-cue {
+      font-size: 0.76rem;
+      font-style: italic;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+    .announce-chevron {
+      font-size: 0.85rem;
+      color: var(--muted);
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .announce-chevron.open { transform: rotate(90deg); }
+    .announce-body {
+      padding: 4px 16px 18px;
+      border-top: 1px solid var(--border);
+    }
+    /* Roomy type — this gets read aloud off a phone screen */
+    .announce-body p {
+      font-size: 1rem;
+      line-height: 1.8;
+      color: var(--cream-dim);
+      margin-top: 14px;
+    }
+    .announce-body p.lede { color: var(--cream); }
+    .announce-time {
+      font-weight: 600;
+      color: var(--gold);
+      background: var(--gold-dim);
+      padding: 1px 6px;
+      border-radius: 2px;
+      white-space: nowrap;
+    }
+    .announce-foot {
+      margin-top: 18px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      font-size: 0.76rem;
+      font-style: italic;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+
+    /* Spoiler variant — the finale. Red spine so it reads as "do not open". */
+    .announce.solution { border-left-color: var(--red); }
+    .announce.solution .announce-label { color: var(--red); }
+    .announce-warn {
+      display: inline-block;
+      font-size: 0.6rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--red);
+      border: 1px solid var(--red);
+      border-radius: 2px;
+      padding: 2px 6px;
+      margin-top: 7px;
+    }
+    .announce-body strong {
+      font-weight: 600;
+      color: var(--cream);
+    }
+
     .grid-stats {
       font-size: 0.65rem;
       letter-spacing: 0.18em;
@@ -650,6 +743,70 @@
     </div>
 
     <div class="grid-view">
+
+      <!-- ── WELCOME ANNOUNCEMENT ── -->
+      <div class="announce">
+        <div class="announce-head" @click="announceOpen = !announceOpen">
+          <div class="announce-head-text">
+            <div class="announce-label">Opening — 7:30pm</div>
+            <div class="announce-title">Welcome Announcement</div>
+            <div class="announce-cue">To be read aloud by Maria Moretti at the start of the party.</div>
+          </div>
+          <span class="announce-chevron" :class="{ open: announceOpen }">›</span>
+        </div>
+
+        <div v-if="announceOpen" class="announce-body">
+          <p class="lede">Good evening, everyone. Salvatore and I are so glad to have you all here tonight — family and friends together, just as it should be on Christmas Eve. Thank you for joining us and for keeping up our traditions. And I must say, some of you are already getting into the spirit of things.</p>
+
+          <p>As you know, a few of us like to wear masks on this night — it's an old family custom. But it seems more of you have decided to join in than usual, because I've already heard reports of masked figures wandering the halls. So thank you, whoever you are, for playing along.</p>
+
+          <p>Please, enjoy yourselves. We may be snowed in by this storm, but we're hardly short on food or wine. At <span class="announce-time">half past nine</span>, we'll all gather for a toast to family and friends, and I believe Zia Donatella has an announcement she'd like to make.</p>
+
+          <p>Now — as some of you have already heard, there was a troubling incident this afternoon. Mr. Chandler Jones, Mr. Johnson's valet, was found in the kitchen by Dinah, our cook. It looks like his heart simply gave out. We're fortunate to have Dr. Bruno and my nephew Charlie here, and they're looking into it. Once the storm passes, we'll see that the proper people are called. Until then, please — try to enjoy the evening as we'd planned.</p>
+
+          <div class="announce-foot">
+            Consigliera's note: the toast is at 9:30pm — two hours after the 7:30pm start. If the evening runs late, give Maria the new time before she reads this, and cue Zia Donatella's announcement straight after the toast.
+          </div>
+        </div>
+      </div>
+
+      <!-- ── THE SOLUTION (spoilers — collapsed by default) ── -->
+      <div class="announce solution">
+        <div class="announce-head" @click="solutionOpen = !solutionOpen">
+          <div class="announce-head-text">
+            <div class="announce-label">Finale — end of the party</div>
+            <div class="announce-title">The Solution</div>
+            <div class="announce-cue">To be read aloud by Amelia Marchetti at the end of the party.</div>
+            <span v-if="!solutionOpen" class="announce-warn">Spoilers — don't open near guests</span>
+          </div>
+          <span class="announce-chevron" :class="{ open: solutionOpen }">›</span>
+        </div>
+
+        <div v-if="solutionOpen" class="announce-body">
+          <p class="lede">Well, what an evening! We've had poison, theft, and more family secrets than I can count on one hand. So let's start with the biggest one.</p>
+
+          <p>For those of you who haven't worked it out: <strong>Dinah Peretti, our cook, is Zia Donatella's daughter.</strong> Donatella gave her up for adoption many years ago, and Dinah is only here tonight because Niko Kontos — the man we've all been calling "Nick Johnson" — is blackmailing her mother. I knew who Dinah was the moment I saw she was wearing the same gold locket I tied around that baby's neck myself, all those years ago.</p>
+
+          <p>Then there's The Fox. The combined presence of the Moretti Diamonds and a Maria Garzoni original under one roof was more than that particular beast could resist. The Fox covered its tracks carefully — but not carefully enough, not with an FBI man and an amateur detective both on the case. <strong>Reggie Vanni, you are The Fox</strong>, and your run ends tonight.</p>
+
+          <p>Which brings me to poor Mr. Jones.</p>
+
+          <p>To solve it, I had to weigh means, motive, and opportunity. The means was simple enough — cyanide, and cyanide isn't the kind of thing you pick up at the corner store. That put two men in the house on my list straightaway: Dr. Bruno and Charlie Callas.</p>
+
+          <p>But why would either of them poison a valet nobody had a quarrel with? The answer came from opportunity. That drink was never meant for Mr. Jones — it was meant for his employer. Which meant Niko Kontos, calling himself Nick Johnson, was the real target all along.</p>
+
+          <p>Now, poisoning your hostess's old friend sounds like a monstrous thing to do — until you remember that Niko Kontos was no friend at all. He seduced Maria Moretti years before her marriage, and has spent recent months blackmailing her over whether Eva might be his daughter. She isn't — a blood test would show Niko is type AB, and Eva is type O, which rules him out entirely. And Niko had already ruined one woman close to this family once before: Dr. Bruno's own niece, Lucy, whose death he never answered for.</p>
+
+          <p>So there was only one man in this house with the means, the motive, and the opportunity — the one who swore an oath to do no harm. <strong>Dr. Sal Bruno, you poisoned that wine</strong>, and Chandler Jones paid for it in your place.</p>
+
+          <p>As for the diamonds — Zia Donatella spent the whole evening wearing the fakes, having genuinely misplaced the real ones. <strong>They were never stolen at all: Carmen's monkey had them the entire time</strong>, and Carmen spent the night quietly trying to find a way to give them back without anyone noticing.</p>
+
+          <div class="announce-foot">
+            Consigliera's note: three reveals in order — Dinah's parentage, Reggie as The Fox, Dr. Bruno as the poisoner — then the diamonds as the closing beat. Make sure Zia Donatella's 9:30 announcement has already happened before this is read.
+          </div>
+        </div>
+      </div>
+
       <div class="char-grid">
         <div
           v-for="char in CHARACTERS"
@@ -1630,6 +1787,8 @@ createApp({
   setup() {
     const selectedChar = ref(null);
     const charIdx = ref(0);
+    const announceOpen = ref(false);
+    const solutionOpen = ref(false);
     const revealedSecret   = ref(false);
     const revealedClue     = ref(false);
     const revealedPassword = ref(false);
@@ -1703,7 +1862,7 @@ createApp({
     function initialsFor(name) { return resolveInitials(name); }
 
     return {
-      CHARACTERS, PLAYER_NAMES, CHARACTER_PASSWORDS, selectedChar, charIdx,
+      CHARACTERS, PLAYER_NAMES, CHARACTER_PASSWORDS, selectedChar, charIdx, announceOpen, solutionOpen,
       revealedSecret, revealedClue, revealedPassword,
       abilityState,
       signOut,

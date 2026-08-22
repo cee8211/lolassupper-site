@@ -299,7 +299,7 @@
     }
     .abilities-list { display: flex; flex-direction: column; gap: 12px; }
 
-    /* Sealed abilities — blurred until 5pm CET Saturday when the game begins */
+    /* Sealed abilities — blurred until 7pm CET Saturday when the game begins */
     .abilities-wrap { position: relative; }
     .abilities-list--sealed {
       filter: blur(7px);
@@ -582,6 +582,47 @@
     .tree-side-name  { font-size: 15px; font-weight: 700; fill: var(--ink); font-family: 'Lora', serif; }
     .tree-side-header{ font-size: 13px; font-style: italic; fill: var(--muted); font-family: 'Lora', serif; }
     .tree-line       { stroke: var(--ink); stroke-width: 1.5; fill: none; }
+
+    /* ── WHO'S WHO (under the tree) ── */
+    .cast-heading {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem;
+      font-weight: 400;
+      color: var(--ink);
+      margin: 28px 0 4px;
+    }
+    .cast-note {
+      font-size: 0.85rem;
+      font-style: italic;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+    .cast-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .cast-item {
+      font-size: 0.9rem;
+      line-height: 1.55;
+      color: var(--ink-dim);
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(0,0,0,0.07);
+    }
+    .cast-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .cast-name {
+      font-family: 'Lora', serif;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .cast-you {
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-left: 6px;
+    }
 
     /* ── PREVIEW / COUNTDOWN ── */
     .preview {
@@ -979,6 +1020,16 @@
           </g>
         </svg>
       </div>
+
+      <!-- Quick who's-who, straight from the intro cards -->
+      <div class="cast-heading">Who's Who</div>
+      <p class="cast-note">A quick reminder of everyone at the table.</p>
+      <ul class="cast-list">
+        <li v-for="p in CAST" :key="p.name" class="cast-item">
+          <span class="cast-name">{{ p.name }}</span><span v-if="char && p.name === char.name" class="cast-you">you</span>
+          — {{ p.intro }}
+        </li>
+      </ul>
     </div>
 
   </template>
@@ -1707,10 +1758,37 @@ function initialsFor(name) {
 // ── REVEAL TIME: 9am CET (UTC+1) Wednesday 19 August 2026 ──
 const REVEAL_AT = new Date('2026-08-19T09:00:00+01:00').getTime();
 
-// ── GAME START: 5pm CET (UTC+2 in August) Saturday 22 August 2026 ──
+// ── GAME START: 7pm CET (UTC+2 in August) Saturday 22 August 2026 ──
 // Once we cross this, players can only mark uses SPENT — they can no
 // longer un-check a circle to recover a use.
-const GAME_START_AT = new Date('2026-08-22T17:00:00+02:00').getTime();
+const GAME_START_AT = new Date('2026-08-22T19:00:00+02:00').getTime();
+
+// Bump this whenever GAME_START_AT moves. It's baked into the per-character
+// "already reset" flag below, so a new value forces the clean-sheet reset to
+// fire again at the new start time — otherwise players whose phones already
+// crossed the OLD start time keep the uses they burned during the delay.
+const GAME_START_TAG = '1900';
+
+// ── CAST OVERVIEW (shown under the family tree) ──
+// Intro lines only — the costume cues from the invite cards are omitted,
+// since by game night everyone's already dressed.
+const CAST = [
+  { name: 'Salvatore Moretti',      intro: 'Head of the Moretti family, "Il Leone" himself.' },
+  { name: 'Maria Moretti',          intro: 'Salvatore\'s devoted wife and the evening\'s elegant hostess.' },
+  { name: 'Eva Moretti',            intro: 'The Morettis\' stylish 21-year-old daughter with big design dreams.' },
+  { name: 'Guido Moretti',          intro: 'The dutiful, Harvard-educated son.' },
+  { name: 'Carmen Moretti',         intro: 'The mischievous 16-year-old baby of the family.' },
+  { name: 'Zia Donatella Moretti',  intro: 'Salvatore\'s elderly, scatterbrained great-aunt.' },
+  { name: 'Jimmy Callas',           intro: 'Maria Moretti\'s brother, a well-travelled arts and antiques dealer.' },
+  { name: 'Charlie Callas',         intro: 'Jimmy\'s son and Maria Moretti\'s nephew, a charming Harvard student.' },
+  { name: 'Nick Johnson',           intro: 'An unexpected guest and old friend of Maria\'s.' },
+  { name: 'Dr. Sal Bruno',          intro: 'The retired family doctor and old friend.' },
+  { name: 'Reggie Vanni',           intro: 'Eva Moretti\'s stylish, socialite friend.' },
+  { name: 'Christy Cardone',        intro: 'Guido\'s ambitious law-school friend.' },
+  { name: 'Amelia Marchetti',       intro: 'Donatella\'s eccentric old friend and self-styled detective.' },
+  { name: 'Dinah Peretti',          intro: 'The temporary cook filling in for the night.' },
+  { name: 'Enzo Rizzo',             intro: 'Il Leone\'s right hand — quiet, watchful, loyal to the bone.' },
+];
 
 // ── APP ──
 const { createApp, ref, computed, onMounted } = Vue;
@@ -1769,7 +1847,7 @@ createApp({
       if (Date.now() < stopAt) {
         const timer = setInterval(() => {
           now.value = Date.now();
-          maybeResetForGameStart();  // fires the moment we cross 5pm
+          maybeResetForGameStart();  // fires the moment we cross 7pm
           if (now.value >= stopAt) clearInterval(timer);
         }, 1000);
       }
@@ -1786,7 +1864,7 @@ createApp({
     function maybeResetForGameStart() {
       if (!char.value) return;
       if (Date.now() < GAME_START_AT) return;
-      const flagKey = `sicilian_gamestart_reset_${char.value.id}`;
+      const flagKey = `sicilian_gamestart_reset_${GAME_START_TAG}_${char.value.id}`;
       if (localStorage.getItem(flagKey)) return;
       uses.value = char.value.abilities.map(() => 0);
       save();
@@ -1816,7 +1894,7 @@ createApp({
     }
 
     return {
-      char, uses, bioOpen, revSecret, revClue, rulesOpen, treeOpen,
+      char, uses, bioOpen, revSecret, revClue, rulesOpen, treeOpen, CAST,
       isRevealed, isLive, countdown, gameCountdown,
       toggle, inc, dec, logout, colorFor, initialsFor,
     };
